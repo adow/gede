@@ -404,7 +404,11 @@ def load_chats_files_2(is_private=False):
             # Read file content, get the first user message as title
             with open(os.path.join(chat_dir, filename), "r") as f:
                 content = f.read()
-                chat_data = json.loads(content)
+                try:
+                    chat_data = json.loads(content)
+                except Exception as error:
+                    logger.warning(f"Failed to load chat file {filename}: {str(error)}")
+                    continue
                 title = chat_data.get("title", "Untitled")
                 if title == "" or title == "New Chat" or title == "Untitled":
                     messages = chat_data.get("messages", [])
