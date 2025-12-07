@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gede"
-version = "0.3.18"
+version = "0.3.19"
 description = "A powerful CLI for interacting with multiple LLM providers. Support 10+ providers with smart chat management, encryption, MCP servers, and rich tools ecosystem."
 readme = "README.md"
 license = { text = "MIT" }
