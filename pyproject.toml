@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "gede"
+version = "0.3.16"
+description = "A powerful CLI for interacting with multiple LLM providers. Support 10+ providers with smart chat management, encryption, MCP servers, and rich tools ecosystem."
+readme = "README.md"
+license = { text = "MIT" }
+authors = [{ name = "adow", email = "reynoldqin@gmail.com" }]
+maintainers = [{ name = "adow", email = "reynoldqin@gmail.com" }]
+keywords = ["LLM", "CLI", "AI", "ChatGPT", "OpenAI", "Anthropic", "DeepSeek"]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: End Users/Desktop",
+  "License :: OSI Approved :: MIT License",
+  "Natural Language :: Chinese (Simplified)",
+  "Natural Language :: English",
+  "Operating System :: MacOS",
+  "Operating System :: POSIX :: Linux",
+  "Operating System :: Microsoft :: Windows",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Internet",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities",
+  "Typing :: Typed",
+]
+requires-python = ">=3.12"
+dependencies = [
+  "anyio>=4.9.0",
+  "cryptography>=44.0.2",
+  "httpx>=0.28.1",
+  "inquirer>=3.4.1",
+  "mcp>=1.12.4",
+  "openai-agents>=0.2.11",
+  "prompt-toolkit>=3.0.52",
+  "pydantic>=2.10.6",
+  "pyfiglet>=1.0.4",
+  "python-dotenv==1.0.1",
+  "rich>=13.9.4",
+]
+
+[project.optional-dependencies]
+arize-trace = [
+  "arize-phoenix-otel>=0.13.1",
+  "openinference-instrumentation-openai-agents>=1.3.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/adow/gede"
+Documentation = "https://github.com/adow/gede#readme"
+Repository = "https://github.com/adow/gede.git"
+"Bug Tracker" = "https://github.com/adow/gede/issues"
+Changelog = "https://github.com/adow/gede/blob/main/CHANGELOG.md"
+
+[project.scripts]
+gede = "gede.gede:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["gede"]
