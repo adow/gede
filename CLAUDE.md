@@ -88,7 +88,7 @@ The `gede/llm/` directory contains a unified provider system:
 
 ### Dependencies and Framework
 
-- Built with Python 3.12+ using modern async/await patterns
+- Built with Python 3.10+ using modern async/await patterns
 - Uses `openai-agents` library for core agent functionality
 - Rich terminal UI with `rich`, `prompt-toolkit` for interactive elements
 - HTTP clients: `httpx` for async requests, `requests` for compatibility

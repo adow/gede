@@ -23,6 +23,8 @@ classifiers = [
   "Operating System :: POSIX :: Linux",
   "Operating System :: Microsoft :: Windows",
   "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
   "Topic :: Internet",
@@ -30,7 +32,7 @@ classifiers = [
   "Topic :: Utilities",
   "Typing :: Typed",
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.10"
 dependencies = [
   "anyio>=4.9.0",
   "cryptography>=44.0.2",

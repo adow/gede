@@ -20,7 +20,7 @@ Protocol) integration for enhanced AI interactions.
 
 ### Prerequisites
 
-- Python 3.12 or higher
+- Python 3.10 or higher
 - `uv` package manager
 
 ## Install
@@ -386,7 +386,7 @@ gede/
 
 ## Technology Stack
 
-- **Language**: Python 3.12+
+- **Language**: Python 3.10+
 - **CLI Framework**: rich, inquirer, prompt-toolkit,
 - **Encryption**: cryptography
 - **HTTP Client**: httpx

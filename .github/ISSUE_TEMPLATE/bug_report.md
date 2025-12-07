@@ -14,7 +14,7 @@ A clear and concise description of what the bug is.
 ## Environment
 
 - **OS**: (e.g., macOS 14.1, Ubuntu 22.04, Windows 11)
-- **Python version**: (e.g., 3.12.1)
+- **Python version**: (e.g., 3.10.13)
 - **Gede version**: (output of `gede --version` or check in code)
 - **LLM Provider**: (e.g., OpenAI, Anthropic, DeepSeek)
 

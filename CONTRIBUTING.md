@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Gede! We welcome contributions fr
 
 ### Prerequisites
 
-- Python 3.12 or higher
+- Python 3.10 or higher
 - `uv` package manager
 - Git
 
@@ -153,7 +153,7 @@ Include the following information:
 1. **Environment**:
    ```
    - OS: (e.g., macOS 14.1, Ubuntu 22.04)
-   - Python version: (e.g., 3.12.1)
+   - Python version: (e.g., 3.10.13)
    - Gede version: (output of `gede --version`)
    ```
 
