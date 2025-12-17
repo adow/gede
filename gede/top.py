@@ -8,7 +8,7 @@ from rich.logging import RichHandler
 from rich.console import Console
 from rich.theme import Theme
 
-VERSION = "0.3.20"
+VERSION = "0.3.21"
 
 # Set log format
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")

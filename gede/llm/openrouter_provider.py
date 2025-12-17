@@ -52,6 +52,8 @@ class OpenRouterProvider(LLMProviderBase):
                         or model_id.startswith("anthropic")
                         or model_id.startswith("meta-llama")
                         or model_id.startswith("google")
+                        or model_id.startswith("mistral")
+                        or model_id.startswith("mimo")
                     ):
                         model = LLMModel(model_id=model_id, name=name)
                         models.append(model)
