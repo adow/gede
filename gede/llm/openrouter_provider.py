@@ -52,8 +52,8 @@ class OpenRouterProvider(LLMProviderBase):
                         or model_id.startswith("anthropic")
                         or model_id.startswith("meta-llama")
                         or model_id.startswith("google")
-                        or model_id.startswith("mistral")
-                        or model_id.startswith("mimo")
+                        or model_id.startswith("mistralai")
+                        or model_id.startswith("xiaomi")
                     ):
                         model = LLMModel(model_id=model_id, name=name)
                         models.append(model)
@@ -85,6 +85,8 @@ class OpenRouterProvider(LLMProviderBase):
                     or model_id.startswith("anthropic")
                     or model_id.startswith("meta-llama")
                     or model_id.startswith("google")
+                    or model_id.startswith("mistralai")
+                    or model_id.startswith("xiaomi")
                 ):
                     models.append(LLMModel(model_id=model_id, name=name))
             logger.debug(f"OpenRouter models loaded: {len(models)}")
