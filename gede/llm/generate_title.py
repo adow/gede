@@ -39,10 +39,13 @@ async def generate_title(messages: list[TResponseInputItem]):
         ),
     )
     input_text = ""
-    for one in messages[:5]:
+    for one in messages:
         role = one.get("role", "user")
         content = one.get("content", "")
         input_text += f"{role}: {content}\n\n"
+        if len(input_text) > 3000:
+            input_text = input_text[:3000]
+            break
     logger.debug("generate_title input_text: %s", input_text)
     result = await Runner.run(agent, input_text)
     output: Optional[str] = result.final_output
