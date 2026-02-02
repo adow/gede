@@ -110,6 +110,11 @@ class LLMProviderBase:
     def load_models(self):
         pass
 
+    @property
+    def default_models(self) -> Optional[list[str]]:
+        """默认启用的模型列表"""
+        return None
+
     # model settings
 
     def model_settings_for_model_id(self, model_id: str) -> ModelSettings:

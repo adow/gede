@@ -119,19 +119,40 @@ async def chat(context: CommandConext):
                 if event.item.type == "tool_call_item":
                     # Handle both Pydantic models and dicts
                     if isinstance(event.item.raw_item, dict):
-                        logger.debug("tool_call_item: %s", json.dumps(event.item.raw_item, indent=2, ensure_ascii=False))
+                        logger.debug(
+                            "tool_call_item: %s",
+                            json.dumps(
+                                event.item.raw_item, indent=2, ensure_ascii=False
+                            ),
+                        )
                         tool_dict = event.item.raw_item
                     else:
-                        logger.debug("tool_call_item: %s", event.item.raw_item.model_dump_json(indent=2, exclude_none=True))
+                        logger.debug(
+                            "tool_call_item: %s",
+                            event.item.raw_item.model_dump_json(
+                                indent=2, exclude_none=True
+                            ),
+                        )
                         tool_dict = event.item.raw_item.model_dump()
-                    
-                    name = tool_dict.get("name") if isinstance(tool_dict, dict) else getattr(tool_dict, "name", None)
-                    arguments = tool_dict.get("arguments", "") if isinstance(tool_dict, dict) else getattr(tool_dict, "arguments", "")
+
+                    name = (
+                        tool_dict.get("name")
+                        if isinstance(tool_dict, dict)
+                        else getattr(tool_dict, "name", None)
+                    )
+                    arguments = (
+                        tool_dict.get("arguments", "")
+                        if isinstance(tool_dict, dict)
+                        else getattr(tool_dict, "arguments", "")
+                    )
 
                     if name:
                         tool_description = f"{name}:{arguments}" if arguments else name
                         console.print()
-                        console.print(Panel(f"🧰 {tool_description}", expand=False), style="warning")
+                        console.print(
+                            Panel(f"🧰 {tool_description}", expand=False),
+                            style="warning",
+                        )
 
                 elif event.item.type == "tool_call_output_item":
                     # Output tool call result

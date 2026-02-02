@@ -37,5 +37,23 @@ custom_theme = Theme(
 console = Console(theme=custom_theme)
 
 
+# DEFAULT_MODEL_PATH = "voice_engine:doubao-seed-1-6"
+DEFAULT_MODEL_PATH = "openrouter:google/gemini-3-pro-preview"
+
+
 def gede_dir():
     return os.path.join(Path.home(), ".gede")
+
+
+def gede_cache_dir():
+    cache_dir = os.path.join(gede_dir(), "cache")
+    if not os.path.exists(cache_dir):
+        os.makedirs(cache_dir)
+    return cache_dir
+
+
+def gede_data_dir():
+    data_dir = os.path.join(gede_dir(), "data")
+    if not os.path.exists(data_dir):
+        os.makedirs(data_dir)
+    return data_dir
