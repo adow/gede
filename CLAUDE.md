@@ -12,6 +12,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - chatcore2.py 代替 chatcore.py
 - context.py 代替 commands 中的 CommandContext
 
+## Prerequisites
+
+- Python 3.10 or higher
+- `uv` package manager
+
 ## Development Commands
 
 ### Setup and Dependencies

@@ -10,7 +10,7 @@ from typing import Any, AsyncIterator, Optional
 from ..mcp.mcp_client import MCPServerType
 from .events import (
     Usage,
-    ChatCompleteionStreamContentEvent,
+    ChatCompletionStreamContentEvent,
     ChatCompletionStreamReasoningContentEvent,
     ChatCompletionStreamToolCallStartEvent,
     ChatCompletionStreamToolCallResultEvent,
@@ -78,7 +78,7 @@ class ChatCompletionStreamProcessor:
             # 处理 content
             if chunk.content:
                 content_buffer += chunk.content
-                yield ChatCompleteionStreamContentEvent(content=chunk.content)
+                yield ChatCompletionStreamContentEvent(content=chunk.content)
 
             # 工具调用 - 直接使用已累积的完整状态
             if chunk.tool_calls:

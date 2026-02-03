@@ -20,7 +20,7 @@ from .types import (
 )
 from .events import (
     Usage,
-    ChatCompleteionStreamContentEvent,
+    ChatCompletionStreamContentEvent,
     ChatCompletionStreamReasoningContentEvent,
     ChatCompletionStreamToolCallStartEvent,
     ChatCompletionStreamToolCallResultEvent,
@@ -45,7 +45,7 @@ __all__ = [
     "UnifiedMessage",
     "UnifiedToolParam",
     "Usage",
-    "ChatCompleteionStreamContentEvent",
+    "ChatCompletionStreamContentEvent",
     "ChatCompletionStreamReasoningContentEvent",
     "ChatCompletionStreamToolCallStartEvent",
     "ChatCompletionStreamToolCallResultEvent",

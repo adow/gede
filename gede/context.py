@@ -12,6 +12,7 @@ from rich.console import Console
 from my_llmkit.mcp import MCPServerBase, MCPServerType
 from my_llmkit.chat import ToolFunctions
 from .chatcore2 import ChatModel
+from .display import NotificationRenderer
 
 
 @dataclass
@@ -21,6 +22,9 @@ class Context:
 
     # Current chat session
     current_chat: "ChatModel"
+
+    # Display renderers
+    notification: NotificationRenderer = field(init=False)
 
     mcp_servers: dict[str, MCPServerBase] = field(default_factory=dict)
 
@@ -39,6 +43,8 @@ class Context:
         self.current_chat = current_chat
         self.mcp_servers = mcp_servers if mcp_servers is not None else {}
         self.tools = tools if tools is not None else ToolFunctions()
+        # 初始化通知渲染器
+        self.notification = NotificationRenderer(console)
 
     async def print_chat_info(self):
         from rich.panel import Panel

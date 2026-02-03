@@ -8,9 +8,10 @@ from rich.console import Console
 from rich.live import Live
 from rich.spinner import Spinner
 from rich.text import Text
+from rich.panel import Panel
 
 # 导入事件类型
-from my_llmkit.chat.events import (
+from my_llmkit.chat import (
     ChatCompletionStreamContentEvent,
     ChatCompletionStreamReasoningContentEvent,
     ChatCompletionStreamToolCallStartEvent,
@@ -42,6 +43,8 @@ class MessageRenderer:
         "reasoning_label": "dim",
         "content": "",
         "loading": "dim",
+        "tool": "dim",
+        "usage": "dim",
     }
 
     def __init__(self, console: Console):
@@ -81,7 +84,7 @@ class MessageRenderer:
 
         Args:
             event: 流式事件对象，可以是以下类型之一：
-                - ChatCompleteionStreamContentEvent: 回答内容事件
+                - ChatCompletionStreamContentEvent: 回答内容事件
                 - ChatCompletionStreamReasoningContentEvent: 推理内容事件
                 - ChatCompletionStreamToolCallStartEvent: 工具调用开始事件
                 - ChatCompletionStreamToolCallResultEvent: 工具调用结果事件
@@ -167,6 +170,15 @@ class MessageRenderer:
             工具调用信息（如果有）
         """
         # 当前实现为占位符，可以根据需要扩展
+        tool_description = (
+            f"{event.function_name}: {event.function_args}"
+            if event.function_args
+            else event.function_name
+        )
+        self.console.print()
+        self.console.print(
+            Panel(f"🧰 {tool_description}", expand=False), style=self.STYLES["tool"]
+        )
         return None
 
     def _render_tool_call_result(
@@ -197,6 +209,12 @@ class MessageRenderer:
             使用统计信息（如果有）
         """
         # 当前实现为占位符，可以根据需要扩展
+        self.console.print()
+        usage = event.usage
+        self.console.print(
+            f"Input {usage.prompt_tokens}, Reasoning {usage.reasoning_tokens}, Output {usage.completion_tokens}, Total {usage.total_tokens}, Cached {usage.cached_tokens} ",
+            style=self.STYLES["usage"],
+        )
         return None
 
     def finish_message(self):
@@ -210,3 +228,150 @@ class MessageRenderer:
         self._first_output = True
         if self._live:
             self._live = None
+
+
+class NotificationRenderer:
+    """处理系统提示、错误、通知等简单信息的显示
+
+    与 MessageRenderer 职责分离，专注于简单的通知消息渲染，
+    不涉及复杂的流式渲染和状态管理。
+    """
+
+    # 样式配置
+    STYLES = {
+        "info": "blue",
+        "success": "green",
+        "warning": "yellow",
+        "error": "red bold",
+        "dim": "dim",
+    }
+
+    def __init__(self, console: Console):
+        """初始化通知渲染器
+
+        Args:
+            console: Rich Console实例，用于输出显示
+        """
+        self.console = console
+
+    def info(self, message: str):
+        """显示提示信息
+
+        Args:
+            message: 提示信息文本
+        """
+        self.console.print(f"ℹ️  {message}", style=self.STYLES["info"])
+
+    def success(self, message: str):
+        """显示成功信息
+
+        Args:
+            message: 成功信息文本
+        """
+        self.console.print(f"✓ {message}", style=self.STYLES["success"])
+
+    def warning(self, message: str):
+        """显示警告信息
+
+        Args:
+            message: 警告信息文本
+        """
+        self.console.print(f"⚠️  {message}", style=self.STYLES["warning"])
+
+    def error(self, message: str):
+        """显示错误信息
+
+        Args:
+            message: 错误信息文本
+        """
+        self.console.print(f"✗ {message}", style=self.STYLES["error"])
+
+    def dim(self, message: str):
+        """显示弱化的提示信息
+
+        Args:
+            message: 提示信息文本
+        """
+        self.console.print(message, style=self.STYLES["dim"])
+
+
+# tests
+
+
+def test_notification():
+    """测试 NotificationRenderer 的各种显示效果"""
+    console = Console()
+    notification = NotificationRenderer(console)
+
+    console.print("\n[bold cyan]测试 NotificationRenderer 各种消息类型：[/bold cyan]\n")
+
+    # 测试各种消息类型
+    notification.info("这是一条提示信息 - 用于显示一般性的提示")
+    notification.success("这是一条成功信息 - 用于显示操作成功")
+    notification.warning("这是一条警告信息 - 用于显示需要注意的事项")
+    notification.error("这是一条错误信息 - 用于显示错误或失败")
+    notification.dim("这是一条弱化的提示信息 - 用于显示次要提示")
+
+    console.print("\n[bold cyan]实际使用场景示例：[/bold cyan]\n")
+
+    # 实际使用场景示例
+    notification.dim("Tip: Type '\\' for multi-line input, or just type your message.")
+    notification.info("正在加载配置文件...")
+    notification.success("配置文件加载成功")
+    notification.warning("检测到旧版本配置，建议更新")
+    notification.error("找不到模型路径对应的 Provider: openai/gpt-4")
+
+    console.print()
+
+
+def test_message_renderer():
+    """测试 MessageRenderer 的显示效果"""
+    import asyncio
+
+    console = Console()
+    renderer = MessageRenderer(console)
+
+    console.print("\n[bold cyan]测试 MessageRenderer 流式渲染：[/bold cyan]\n")
+
+    # 模拟流式事件
+    async def simulate_stream():
+        renderer.show_loading("Assistant is thinking")
+        await asyncio.sleep(1)
+
+        # 模拟推理内容
+        reasoning_text = "让我分析一下这个问题..."
+        for i in range(0, len(reasoning_text), 3):
+            chunk = reasoning_text[i : i + 3]
+            event = ChatCompletionStreamReasoningContentEvent(content=chunk)
+            renderer.render_event(event)
+            await asyncio.sleep(0.05)
+
+        # 模拟回答内容
+        answer_text = "这是一个示例回答，展示流式渲染的效果。"
+        for i in range(0, len(answer_text), 2):
+            chunk = answer_text[i : i + 2]
+            event = ChatCompletionStreamContentEvent(content=chunk)
+            renderer.render_event(event)
+            await asyncio.sleep(0.05)
+
+        renderer.render_event(
+            ChatCompletionStreamToolCallStartEvent(function_name="now")
+        )
+
+        renderer.finish_message()
+
+    asyncio.run(simulate_stream())
+    console.print()
+
+
+def tests():
+    # 测试 NotificationRenderer
+    test_notification()
+
+    # 测试 MessageRenderer
+    test_message_renderer()
+
+
+if __name__ == "__main__":
+    """运行所有测试"""
+    tests()

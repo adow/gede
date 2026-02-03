@@ -37,7 +37,7 @@ from .llm.tools.tools import get_tools
 from .profiles import get_profile
 from .context import Context
 from .llm.providers2 import get_provider_from_model_path
-from .display import MessageRenderer
+from .display import MessageRenderer, NotificationRenderer
 
 
 def clean_unicode_text(text):
@@ -109,7 +109,7 @@ async def chat(context: Context):
     provider = get_provider_from_model_path(model_path)
     if not provider:
         logger.error(f"Provider not found for model_path: {model_path}")
-        console.print(f"[red]错误：找不到模型路径对应的 Provider: {model_path}[/red]")
+        context.notification.error(f"找不到模型路径对应的 Provider: {model_path}")
         return
 
     # 创建消息渲染器
@@ -143,15 +143,13 @@ async def run_main():
     style = create_prompt_style()
     session = PromptSession()
 
-    console.print(
-        "[dim]Tip: Type '\\' for multi-line input, or just type your message.[/dim]"
-    )
-
     current_chat = ChatModel()
 
     context = Context(
         current_chat=current_chat, console=console, prompt_session=session
     )
+
+    context.notification.dim("Tip: Type '\\' for multi-line input, or just type your message.")
 
     while True:
         message = await get_input_message(
