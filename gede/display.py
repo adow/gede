@@ -11,7 +11,7 @@ from rich.text import Text
 
 # 导入事件类型
 from my_llmkit.chat.events import (
-    ChatCompleteionStreamContentEvent,
+    ChatCompletionStreamContentEvent,
     ChatCompletionStreamReasoningContentEvent,
     ChatCompletionStreamToolCallStartEvent,
     ChatCompletionStreamToolCallResultEvent,
@@ -20,7 +20,7 @@ from my_llmkit.chat.events import (
 
 # 定义流式事件的联合类型
 StreamEvent = Union[
-    ChatCompleteionStreamContentEvent,
+    ChatCompletionStreamContentEvent,
     ChatCompletionStreamReasoningContentEvent,
     ChatCompletionStreamToolCallStartEvent,
     ChatCompletionStreamToolCallResultEvent,
@@ -64,10 +64,7 @@ class MessageRenderer:
         loading_text = Text(text, style=self.STYLES["loading"])
         spinner = Spinner("dots", text=loading_text)
         self._live = Live(
-            spinner,
-            console=self.console,
-            refresh_per_second=4,
-            transient=True
+            spinner, console=self.console, refresh_per_second=4, transient=True
         )
         self._live.start()
         self._first_output = True
@@ -98,7 +95,7 @@ class MessageRenderer:
             self.stop_loading()
             self.console.print(
                 f"[{self.STYLES['assistant_label']}]Assistant: [/{self.STYLES['assistant_label']}]",
-                end=""
+                end="",
             )
             self._first_output = False
 
@@ -140,7 +137,7 @@ class MessageRenderer:
         return event.content
 
     def _render_content(
-        self, event: ChatCompleteionStreamContentEvent, is_new_section: bool
+        self, event: ChatCompletionStreamContentEvent, is_new_section: bool
     ) -> str:
         """渲染回答内容
 

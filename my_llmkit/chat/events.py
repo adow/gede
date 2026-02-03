@@ -15,7 +15,7 @@ class Usage(BaseModel):
     model: Optional[str] = None
 
 
-class ChatCompleteionStreamContentEvent:
+class ChatCompletionStreamContentEvent:
     type: Literal["content"] = "content"
     content: str
 

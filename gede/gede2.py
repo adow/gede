@@ -36,7 +36,7 @@ from .chatcore2 import ChatModel
 from .llm.tools.tools import get_tools
 from .profiles import get_profile
 from .context import Context
-from .llm.providers2.openrouter import OpenRouterProvider
+from .llm.providers2 import get_provider_from_model_path
 from .display import MessageRenderer
 
 
@@ -104,8 +104,13 @@ async def chat(context: Context):
     input_message = context.current_chat.get_messages_to_talk()
     model_path = context.current_chat.model_path
     model_info = await context.current_chat.model
-    # TODO: 选择合适的 Provider
-    provider = OpenRouterProvider()
+
+    # 根据 model_path 自动选择合适的 Provider
+    provider = get_provider_from_model_path(model_path)
+    if not provider:
+        logger.error(f"Provider not found for model_path: {model_path}")
+        console.print(f"[red]错误：找不到模型路径对应的 Provider: {model_path}[/red]")
+        return
 
     # 创建消息渲染器
     renderer = MessageRenderer(console)

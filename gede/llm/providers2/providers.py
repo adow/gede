@@ -132,6 +132,40 @@ async def remove_model(provider_id: str, model_id: str):
             break
 
 
+def get_provider_by_id(provider_id: str) -> LLMProviderBase | None:
+    """
+    根据 provider_id 获取对应的 Provider 实例
+
+    Args:
+        provider_id: Provider 的唯一标识符，如 'openrouter', 'zenmux'
+
+    Returns:
+        对应的 Provider 实例，如果找不到则返回 None
+    """
+    for provider in PROVIDERS:
+        if provider.provider_id == provider_id:
+            return provider
+    return None
+
+
+def get_provider_from_model_path(model_path: str) -> LLMProviderBase | None:
+    """
+    从 model_path 中解析 provider_id 并返回对应的 Provider 实例
+
+    Args:
+        model_path: 模型路径，格式为 'provider_id:model_id'，如 'openrouter:gpt-4'
+
+    Returns:
+        对应的 Provider 实例，如果找不到或格式错误则返回 None
+    """
+    if ':' not in model_path:
+        logger.warning(f"Invalid model_path format: {model_path}, expected 'provider_id:model_id'")
+        return None
+
+    provider_id = model_path.split(':', 1)[0]
+    return get_provider_by_id(provider_id)
+
+
 # tests
 
 

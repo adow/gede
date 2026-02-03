@@ -4,6 +4,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **始终使用中文来回复用户和完成计划**
 
+## 正在重构
+
+- 正在开发入口文件 gede2.py (代替 gede.py)
+- 使用 my_llmkit 提供 llm chat, 以及模型能力信息
+- llm/providers2 中的内容代替 llm 下各个 provider 的原有功能
+- chatcore2.py 代替 chatcore.py
+- context.py 代替 commands 中的 CommandContext
+
 ## Development Commands
 
 ### Setup and Dependencies
