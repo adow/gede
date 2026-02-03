@@ -109,14 +109,25 @@ async def chat(context: Context):
     # TODO: 选择合适的 Provider
     provider = OpenRouterProvider()
 
+    # Create loading prompt
+    loading_text = Text("Assistant is thinking", style="dim")
+    spinner = Spinner("dots", text=loading_text)
+    live = Live(spinner, console=console, refresh_per_second=4, transient=True)
+    live.start()
+
     chat_client = provider.get_chat_client(model_info.model_id)
     runner = chat_client.run_stream(messages=input_message)
 
-    console.print("[bold deep_sky_blue1]Assistant: [/bold deep_sky_blue1]", end="")
     full_answer_buffer = ""
     full_reasoning_buffer = ""
     last_event_type = ""
     async for event in runner.stream_event():
+        if live.is_started:
+            live.stop()
+            console.print(
+                "[bold deep_sky_blue1]Assistant: [/bold deep_sky_blue1]", end=""
+            )
+
         new_tag = last_event_type != event.type
         last_event_type = event.type
 
