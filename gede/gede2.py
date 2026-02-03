@@ -21,9 +21,6 @@ from agents import Agent, Runner, OpenAIChatCompletionsModel, Tool, set_tracing_
 from prompt_toolkit.shortcuts import CompleteStyle
 from rich import print
 from rich.panel import Panel
-from rich.live import Live
-from rich.spinner import Spinner
-from rich.text import Text
 from prompt_toolkit import prompt, PromptSession
 from prompt_toolkit.history import FileHistory, History, InMemoryHistory
 from prompt_toolkit.completion import WordCompleter
@@ -40,6 +37,7 @@ from .llm.tools.tools import get_tools
 from .profiles import get_profile
 from .context import Context
 from .llm.providers2.openrouter import OpenRouterProvider
+from .display import MessageRenderer
 
 
 def clean_unicode_text(text):
@@ -109,49 +107,29 @@ async def chat(context: Context):
     # TODO: 选择合适的 Provider
     provider = OpenRouterProvider()
 
-    # Create loading prompt
-    loading_text = Text("Assistant is thinking", style="dim")
-    spinner = Spinner("dots", text=loading_text)
-    live = Live(spinner, console=console, refresh_per_second=4, transient=True)
-    live.start()
+    # 创建消息渲染器
+    renderer = MessageRenderer(console)
+    renderer.show_loading("Assistant is thinking")
 
     chat_client = provider.get_chat_client(model_info.model_id)
     runner = chat_client.run_stream(messages=input_message)
 
     full_answer_buffer = ""
     full_reasoning_buffer = ""
-    last_event_type = ""
+
     async for event in runner.stream_event():
-        if live.is_started:
-            live.stop()
-            console.print(
-                "[bold deep_sky_blue1]Assistant: [/bold deep_sky_blue1]", end=""
-            )
+        # 渲染事件并收集内容
+        content = renderer.render_event(event)
 
-        new_tag = last_event_type != event.type
-        last_event_type = event.type
-
+        # 收集完整的响应内容用于保存
         if event.type == "reasoning_content":
-            if new_tag:
-                console.print()
-                console.print("[Reasoining]", style="dim")
             full_reasoning_buffer += event.content
-            console.print(event.content, end="", style="dim")
         elif event.type == "content":
-            if new_tag:
-                console.print()
             full_answer_buffer += event.content
-            console.print(event.content, end="")
-        elif event.type == "tool_call_start":
-            pass
-        elif event.type == "tool_call_result":
-            pass
-        elif event.type == "usage":
-            pass
-        else:
-            pass
+
+    # 保存助手消息并完成渲染
     context.current_chat.append_assistant_message(full_answer_buffer)
-    console.print()
+    renderer.finish_message()
 
 
 async def run_main():
