@@ -14,11 +14,11 @@ from .common import cleanup_screen
 class NewPublicChatCommand(CommandBase):
     def do_command(self) -> bool:
         if self.message == "/new":
-            from ..chatcore import ChatModel
+            from ..chatcore2 import ChatModel
 
             self.context.current_chat = ChatModel(is_private=False)
             self.console.rule("NEW CHAT")
-            self.context.print_chat_info()
+            # self.context.print_chat_info()
             self.print_instruction()
             self.console.print()
             return False
@@ -40,11 +40,11 @@ class NewPublicChatCommand(CommandBase):
 class NewPrivateChatCommand(CommandBase):
     def do_command(self) -> bool:
         if self.message == "/new-private":
-            from ..chatcore import ChatModel
+            from ..chatcore2 import ChatModel
 
             self.context.current_chat = ChatModel(is_private=True)
             self.console.rule("NEW CHAT (Private)")
-            self.context.print_chat_info()
+            # self.context.print_chat_info()
             self.print_instruction()
             self.console.print()
             return False
@@ -89,7 +89,7 @@ class QuitCommand(CommandBase):
 class ChatInfoCommand(CommandBase):
     def do_command(self) -> bool:
         if self.message == "/chat-info":
-            self.context.print_chat_info()
+            # self.context.print_chat_info()
             return False
         return True
 
@@ -113,7 +113,7 @@ class CloneChatCommand(CommandBase):
         command = "/clone-chat"
         if self.message == command:
             old_chat = self.context.current_chat
-            from ..chatcore import ChatModel
+            from ..chatcore2 import ChatModel
 
             clone_chat = ChatModel(is_private=old_chat.is_private)
             clone_chat.set_instruction(old_chat.instruction)
@@ -124,7 +124,7 @@ class CloneChatCommand(CommandBase):
             self.console.rule(
                 f"NEW CHAT{' (Private)' if clone_chat.is_private else ''}"
             )
-            self.context.print_chat_info()
+            # self.context.print_chat_info()
             self.print_instruction()
             self.console.print()
             return False

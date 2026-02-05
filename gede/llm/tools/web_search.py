@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from rich.panel import Panel
 import httpx
 from agents import function_tool, RunContextWrapper
-from ...commands import CommandConext
+from ...commands import CommandContext
 
 
 from ...top import (
@@ -141,7 +141,7 @@ async def exa_web_search(
 
 @function_tool(name_override="web_search_summary_tool")
 async def web_search_summary_tool(
-    wrapper: RunContextWrapper[CommandConext], query: str, summary_query: str
+    wrapper: RunContextWrapper[CommandContext], query: str, summary_query: str
 ):
     """
     Perform internet search, use this tool when the user's question requires the latest information from the internet.
@@ -161,7 +161,7 @@ async def web_search_summary_tool(
 
 
 @function_tool(name_override="web_search_full_tool")
-async def web_search_full_tool(warpper: RunContextWrapper[CommandConext], query: str):
+async def web_search_full_tool(warpper: RunContextWrapper[CommandContext], query: str):
     """
     Perform internet search, use this tool when the user's question requires the latest information from the internet.
     When search results are obtained, the full content of the corresponding links will also be retrieved.

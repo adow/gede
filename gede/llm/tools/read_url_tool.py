@@ -7,7 +7,7 @@ import httpx
 from agents import function_tool, RunContextWrapper
 from ...top import logger
 from rich.panel import Panel
-from ...commands import CommandConext
+from ...commands import CommandContext
 
 
 async def read_url(url: str):
@@ -29,7 +29,7 @@ async def read_url(url: str):
 
 
 @function_tool(name_override="read_page_tool")
-async def read_page_tool(wrapper: RunContextWrapper[CommandConext], url: str) -> str:
+async def read_page_tool(wrapper: RunContextWrapper[CommandContext], url: str) -> str:
     """
     Read webpage content, use this tool when you need to get information from a specified URL
     Args:

@@ -100,7 +100,7 @@ class LoadChatCommand(CommandBase):
             return None
 
     async def do_command_async(self) -> bool:
-        from ..chatcore import ChatModel
+        from ..chatcore2 import ChatModel
 
         cmd = "/load-chat"
         if self.message.startswith(cmd):
@@ -117,8 +117,8 @@ class LoadChatCommand(CommandBase):
                 self.console.rule(f"LOAD CHAT: {chat.filename}")
                 self.print_instruction()
                 for message in chat.messages:
-                    role = message.get("role")
-                    content = message.get("content")
+                    role = message.role
+                    content = message.content
                     if role and content:
                         if role == "system":
                             continue
@@ -161,7 +161,7 @@ class LoadPrivateChatCommand(CommandBase):
             return None
 
     async def do_command_async(self) -> bool:
-        from ..chatcore import ChatModel
+        from ..chatcore2 import ChatModel
 
         cmd = "/load-private-chat"
         if self.message.startswith(cmd):
@@ -186,8 +186,8 @@ class LoadPrivateChatCommand(CommandBase):
                 self.console.rule(f"LOAD PRIVATE CHAT: {chat.filename}")
                 self.print_instruction()
                 for message in chat.messages:
-                    role = message.get("role")
-                    content = message.get("content")
+                    role = message.role
+                    content = message.role
                     if role and content:
                         if role == "system":
                             continue

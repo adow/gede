@@ -4,11 +4,11 @@
 from datetime import datetime, timezone
 import locale
 from agents import function_tool, RunContextWrapper
-from ...commands import CommandConext
+from ...commands import CommandContext
 
 
 @function_tool(name_override="now_tool")
-def now_tool(wrapper: RunContextWrapper[CommandConext]) -> str:
+def now_tool(wrapper: RunContextWrapper[CommandContext]) -> str:
     """
     Get the current date and time, use this tool when you need to determine the current time
     Returns:

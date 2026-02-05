@@ -10,23 +10,29 @@ from typing import Optional, cast, Literal, Any
 from rich.panel import Panel
 from rich.prompt import Prompt
 from openai.types.shared import Reasoning, ReasoningEffort
-from agents import ModelSettings
 
 from .base import CommandBase
-from ..llm.providers import get_model_path_value_list
+from ..llm.providers2.providers import (
+    get_provider_from_model_path,
+    MODEL_DATA,
+    get_model_path_value_list,
+)
 from ..top import logger
 from ..chatcore import WebSearchType
+from my_llmkit.chat.model_settings import ModelSettings
 
 
 class SelectLLMCommand(CommandBase):
+    def get_model_path_value_list(self):
+        pass
+
     def do_command(self) -> bool:
         import inquirer
 
         cmd = "/select-llm"
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
-            no_cache = "--no-cache" in args
-            path_list = get_model_path_value_list(no_cache=no_cache)
+            path_list = get_model_path_value_list()
 
             provider = args.replace("--no-cache", "").strip()
             if provider:
@@ -49,7 +55,7 @@ class SelectLLMCommand(CommandBase):
                 # Reset user model settings when switching models
                 self.context.current_chat.user_model_settings = ModelSettings()
                 self.console.print(
-                    f"Using {self.context.current_chat.model.provider_name}:{self.context.current_chat.model.model.name} now",
+                    f"Using {model_path} now",
                     style="info",
                 )
             else:
@@ -288,39 +294,3 @@ class SetModelReasoningCommand(CommandBase):
     @property
     def doc_description(self) -> str:
         return """Enable reasoning mode for supported models (like o1). LEVEL controls thinking depth: minimal, low, medium, high, or auto. Use 'off' to disable. Deeper reasoning uses more tokens but produces more thorough answers."""
-
-
-class SetModelWebSearchCommand(CommandBase):
-    def do_command(self) -> bool:
-        command = "/set-model-web-search"
-        if self.message.startswith(command):
-            args = self.message[len(command) :].strip() or "off"
-            args = args.lower()
-            allow_types = ["on", "off", "auto"]
-            if args not in allow_types:
-                self.console.print(
-                    f"Invalid web search type. Choose from {','.join(allow_types)}.",
-                    style="warning",
-                )
-                return False
-            web_search_type = cast(WebSearchType, args)
-            try:
-                self.context.current_chat.set_model_web_search(web_search_type)
-                self.console.print(f"Set web search:{web_search_type}", style="info")
-            except Exception as e:
-                self.console.print(e, style="danger")
-            return False
-
-        return True
-
-    @property
-    def command_hint(self) -> Optional[str | tuple[str, ...]]:
-        return "/set-model-web-search"
-
-    @property
-    def doc_title(self) -> str:
-        return "/set-model-web-search <on|off|auto>\nToggle web search capability"
-
-    @property
-    def doc_description(self) -> str:
-        return """Allow the AI to search the web for current information. 'on' enables web search, 'off' disables it, and 'auto' lets the model decide when to search. Web search helps with recent events and factual queries but increases response time."""

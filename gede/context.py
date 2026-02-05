@@ -23,6 +23,8 @@ class Context:
     # Current chat session
     current_chat: "ChatModel"
 
+    message: Optional[str] = None
+
     # Display renderers
     notification: NotificationRenderer = field(init=False)
 
@@ -35,12 +37,14 @@ class Context:
         console: Console,
         prompt_session: PromptSession,
         current_chat: "ChatModel",
+        message: Optional[str] = None,
         mcp_servers: Optional[dict[str, MCPServerBase]] = None,
         tools: Optional[ToolFunctions] = None,
     ):
         self.console = console
         self.prompt_session = prompt_session
         self.current_chat = current_chat
+        self.message = message
         self.mcp_servers = mcp_servers if mcp_servers is not None else {}
         self.tools = tools if tools is not None else ToolFunctions()
         # 初始化通知渲染器

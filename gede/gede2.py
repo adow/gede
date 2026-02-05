@@ -31,7 +31,7 @@ from pyfiglet import figlet_format
 
 from .top import logger, console, VERSION, gede_dir, gede_cache_dir
 from . import config
-from .commands import do_command, CommandConext, get_command_hints
+from .commands import do_command, get_command_hints
 from .chatcore2 import ChatModel
 from .llm.tools.tools import get_tools
 from .profiles import get_profile
@@ -149,7 +149,9 @@ async def run_main():
         current_chat=current_chat, console=console, prompt_session=session
     )
 
-    context.notification.dim("Tip: Type '\\' for multi-line input, or just type your message.")
+    context.notification.dim(
+        "Tip: Type '\\' for multi-line input, or just type your message."
+    )
 
     while True:
         message = await get_input_message(
@@ -157,6 +159,12 @@ async def run_main():
         )
 
         console.print()
+        context.message = message
+        should_continue = await do_command(context)
+        # After command execution, do not continue
+        if not should_continue:
+            console.print()
+            continue
 
         context.current_chat.append_user_message(message)
         # console.print(f"You entered: {message}")

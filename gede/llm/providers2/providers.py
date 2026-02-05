@@ -158,12 +158,30 @@ def get_provider_from_model_path(model_path: str) -> LLMProviderBase | None:
     Returns:
         对应的 Provider 实例，如果找不到或格式错误则返回 None
     """
-    if ':' not in model_path:
-        logger.warning(f"Invalid model_path format: {model_path}, expected 'provider_id:model_id'")
+    if ":" not in model_path:
+        logger.warning(
+            f"Invalid model_path format: {model_path}, expected 'provider_id:model_id'"
+        )
         return None
 
-    provider_id = model_path.split(':', 1)[0]
+    provider_id = model_path.split(":", 1)[0]
     return get_provider_by_id(provider_id)
+
+
+PATH_VALUE_LIST: list[tuple[str, str]] = []
+
+
+def get_model_path_value_list():
+    global PATH_VALUE_LIST
+    if PATH_VALUE_LIST:
+        return PATH_VALUE_LIST
+    for one_provider in MODEL_DATA:
+        for one_model in one_provider.models:
+            name = f"{one_provider.name}:{one_model.name}"
+            path = one_model.model_path
+            PATH_VALUE_LIST.append((name, path))
+
+    return PATH_VALUE_LIST
 
 
 # tests

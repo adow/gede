@@ -82,12 +82,36 @@ class HelpCommand(CommandBase):
         if self.message.startswith(cmd):
             # Import here to avoid circular imports
             from . import get_command_class_list, get_command_class_list_async
-            from .chat_commands import NewPublicChatCommand, NewPrivateChatCommand, QuitCommand, ChatInfoCommand, CloneChatCommand
-            from .instruction_commands import SetInstructionCommand, GetInstructionCommand, SelectInstructionCommand
-            from .model_commands import SelectLLMCommand, SetMessageNumCommand, SetModelSettingsCommand, GetModelSettingsCommand, SetModelReasoningCommand, SetModelWebSearchCommand
-            from .file_commands import SaveCommand, LoadChatCommand, LoadPrivateChatCommand
+            from .chat_commands import (
+                NewPublicChatCommand,
+                NewPrivateChatCommand,
+                QuitCommand,
+                ChatInfoCommand,
+                CloneChatCommand,
+            )
+            from .instruction_commands import (
+                SetInstructionCommand,
+                GetInstructionCommand,
+                SelectInstructionCommand,
+            )
+            from .model_commands import (
+                SelectLLMCommand,
+                SetMessageNumCommand,
+                SetModelSettingsCommand,
+                GetModelSettingsCommand,
+                SetModelReasoningCommand,
+            )
+            from .file_commands import (
+                SaveCommand,
+                LoadChatCommand,
+                LoadPrivateChatCommand,
+            )
             from .tool_commands import SelectToolsCommand, SelectMCPCommand
-            from .other_commands import CleanupCommand, SelectPromptCommand, ExportCommand
+            from .other_commands import (
+                CleanupCommand,
+                SelectPromptCommand,
+                ExportCommand,
+            )
 
             keywords = self.message[len(cmd) :].strip()
 
@@ -112,7 +136,6 @@ class HelpCommand(CommandBase):
                     SetModelSettingsCommand,
                     GetModelSettingsCommand,
                     SetModelReasoningCommand,
-                    SetModelWebSearchCommand,
                 ],
                 "File Operations": [
                     SaveCommand,
@@ -163,7 +186,10 @@ class HelpCommand(CommandBase):
                         description = command_instance.doc_description.strip()
 
                         # Filter by keyword if provided
-                        if not keywords or (keywords.lower() in hint.lower() or keywords.lower() in description.lower()):
+                        if not keywords or (
+                            keywords.lower() in hint.lower()
+                            or keywords.lower() in description.lower()
+                        ):
                             category_commands.append((cmd_entry, description))
 
                 # Only show category if it has matching commands
@@ -187,7 +213,9 @@ class HelpCommand(CommandBase):
             self.console.print(
                 Panel(
                     output,
-                    title="[bold]Gede Command Help[/bold]" if not keywords else f"[bold]Search Results: '{keywords}'[/bold]",
+                    title="[bold]Gede Command Help[/bold]"
+                    if not keywords
+                    else f"[bold]Search Results: '{keywords}'[/bold]",
                     subtitle=f"[dim]Version: {VERSION}[/dim]",
                     expand=True,
                     padding=(1, 2),
@@ -235,9 +263,10 @@ class ExportCommand(CommandBase):
                 export_dir.mkdir(parents=True, exist_ok=True)
                 path = export_dir / path
                 path.parent.mkdir(parents=True, exist_ok=True)
-            exporter = ExportChat(self.context.current_chat)
-            exporter.export_txt(path)
-            self.context.console.print(f"Exported chat to {str(path)}", style="info")
+            # TODO: export chat
+            # exporter = ExportChat(self.context.current_chat)
+            # exporter.export_txt(path)
+            # self.context.console.print(f"Exported chat to {str(path)}", style="info")
             return False
         return True
 
