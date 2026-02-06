@@ -208,18 +208,12 @@ class HelpCommand(CommandBase):
 
             # Add usage tip if no keyword search
             if not keywords:
-                output += f"\n\n[dim]Use '/help KEYWORD' to search for specific commands.[/dim]"
+                output += "\n\n[dim]Use '/help KEYWORD' to search for specific commands.[/dim]"
 
-            self.console.print(
-                Panel(
-                    output,
-                    title="[bold]Gede Command Help[/bold]"
-                    if not keywords
-                    else f"[bold]Search Results: '{keywords}'[/bold]",
-                    subtitle=f"[dim]Version: {VERSION}[/dim]",
-                    expand=True,
-                    padding=(1, 2),
-                ),
+            self.context.info_display.command_help(
+                title="[BOLD]Gede Command Help[/BOLD]",
+                subtitle=f"[dim]Version: {VERSION}[/dim]",
+                description=output,
             )
 
             return False
@@ -247,15 +241,15 @@ class ExportCommand(CommandBase):
         if self.message.startswith(cmd):
             filepath = self.message[len(cmd) :].strip()
             if not filepath:
-                self.context.console.print(
-                    "Please input a valid file path.", style="warning"
+                self.context.notification_display.warning(
+                    "Please input a valid file path."
                 )
                 return False
             path = Path(filepath).expanduser()
             if path.is_absolute():
                 if not path.parent.exists():
-                    self.context.console.print(
-                        "Parent folder not exists.", style="danger"
+                    self.context.notification_display.warning(
+                        "Parent folder not exists."
                     )
                     return False
             else:

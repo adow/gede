@@ -109,7 +109,7 @@ async def chat(context: Context):
     provider = get_provider_from_model_path(model_path)
     if not provider:
         logger.error(f"Provider not found for model_path: {model_path}")
-        context.notification.error(f"找不到模型路径对应的 Provider: {model_path}")
+        context.notification_display.error(f"找不到模型路径对应的 Provider: {model_path}")
         return
 
     # 创建消息渲染器
@@ -149,7 +149,7 @@ async def run_main():
         current_chat=current_chat, console=console, prompt_session=session
     )
 
-    context.notification.dim(
+    context.notification_display.dim(
         "Tip: Type '\\' for multi-line input, or just type your message."
     )
 

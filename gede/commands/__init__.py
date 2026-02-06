@@ -48,6 +48,11 @@ from .other_commands import (
 
 def get_command_class_list() -> list[Type[CommandBase]]:
     """Get all synchronous command classes"""
+    return []
+
+
+def get_command_class_list_async() -> list[Type[CommandBase]]:
+    """Get all asynchronous command classes"""
     return [
         NewPublicChatCommand,
         NewPrivateChatCommand,
@@ -66,12 +71,6 @@ def get_command_class_list() -> list[Type[CommandBase]]:
         SelectToolsCommand,
         CloneChatCommand,
         ExportCommand,
-    ]
-
-
-def get_command_class_list_async() -> list[Type[CommandBase]]:
-    """Get all asynchronous command classes"""
-    return [
         SaveCommand,
         LoadChatCommand,
         LoadPrivateChatCommand,

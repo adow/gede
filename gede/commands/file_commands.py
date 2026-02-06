@@ -48,7 +48,9 @@ class SaveCommand(CommandBase):
                 )
                 password = password.strip()
                 if not password:
-                    self.console.print("Password cannot be empty.", style="warning")
+                    self.context.notification_display.warning(
+                        "Password cannot be empty."
+                    )
                     return False
                 self.context.current_chat.private_password = password
 
@@ -58,12 +60,11 @@ class SaveCommand(CommandBase):
             self.context.current_chat.generate_filename()
             filepath = self.context.current_chat.save()
             if filepath:
-                self.console.print(
-                    f"Chat saved successfully in {filepath}. Title: {self.context.current_chat.title}",
-                    style="info",
+                self.context.notification_display.success(
+                    f"Chat saved successfully in {filepath}. Title: {self.context.current_chat.title}"
                 )
             else:
-                self.console.print("Not saved", style="warning")
+                self.context.notification_display.warning("Not saved")
             return False
         return True
 
@@ -83,8 +84,8 @@ class SaveCommand(CommandBase):
 class LoadChatCommand(CommandBase):
     async def pick_file(self) -> Optional[str]:
         completion = PublicChatFileCompleter()
-        self.console.print(
-            "Type to search for chat files, use arrow keys to select.", style="info"
+        self.context.notification_display.info(
+            "Type to search for chat files, use arrow keys to select."
         )
         try:
             with patch_stdout():
@@ -107,15 +108,15 @@ class LoadChatCommand(CommandBase):
             # filename = self.message[len(cmd) :].strip()
             filename = await self.pick_file()
             if not filename:
-                self.console.print("Filename cannot be empty.", style="danger")
+                self.context.notification_display.warning("Filename cannot be empty.")
                 return False
             chat = ChatModel.load_from_file(filename)
             if not chat:
-                self.console.print(f"Load chat failed: {filename}", style="danger")
+                self.context.notification_display.error(f"Load chat failed: {filename}")
             else:
                 self.context.current_chat = chat
-                self.console.rule(f"LOAD CHAT: {chat.filename}")
-                self.print_instruction()
+                self.context.print_rule(f"LOAD CHAT: {chat.filename}")
+                self.context.print_instruction()
                 for message in chat.messages:
                     role = message.role
                     content = message.content
@@ -144,8 +145,8 @@ class LoadChatCommand(CommandBase):
 class LoadPrivateChatCommand(CommandBase):
     async def pick_file(self) -> Optional[str]:
         completion = PrivateChatFileCompleter()
-        self.console.print(
-            "Type to search for chat files, use arrow keys to select.", style="info"
+        self.context.notification_display.info(
+            "Type to search for chat files, use arrow keys to select."
         )
         try:
             with patch_stdout():
@@ -168,23 +169,23 @@ class LoadPrivateChatCommand(CommandBase):
             # filename = self.message[len(cmd) :].strip()
             filename = await self.pick_file()
             if not filename:
-                self.console.print("Filename cannot be empty.", style="danger")
+                self.context.notification_display.warning("Filename cannot be empty.")
                 return False
             password = Prompt.ask(
                 "[bold dim]Input password for private chat[/bold dim]", password=True
             )
             password = password.strip()
             if not password:
-                self.console.print("Password cannot be empty.", style="warning")
+                self.context.notification_display.warning("Password cannot be empty.")
             chat = ChatModel.load_from_file(
                 filename, is_private=True, private_password=password
             )
             if not chat:
-                self.console.print(f"Load chat failed: {filename}", style="danger")
+                self.context.notification_display.error(f"Load chat failed: {filename}")
             else:
                 self.context.current_chat = chat
-                self.console.rule(f"LOAD PRIVATE CHAT: {chat.filename}")
-                self.print_instruction()
+                self.context.print_rule(f"LOAD CHAT: {chat.filename}")
+                self.context.print_instruction()
                 for message in chat.messages:
                     role = message.role
                     content = message.role

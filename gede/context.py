@@ -12,7 +12,7 @@ from rich.console import Console
 from my_llmkit.mcp import MCPServerBase, MCPServerType
 from my_llmkit.chat import ToolFunctions
 from .chatcore2 import ChatModel
-from .display import NotificationRenderer
+from .display import NotificationRenderer, InfoRenderer
 
 
 @dataclass
@@ -26,7 +26,8 @@ class Context:
     message: Optional[str] = None
 
     # Display renderers
-    notification: NotificationRenderer = field(init=False)
+    notification_display: NotificationRenderer = field(init=False)
+    info_display: InfoRenderer = field(init=False)
 
     mcp_servers: dict[str, MCPServerBase] = field(default_factory=dict)
 
@@ -47,12 +48,12 @@ class Context:
         self.message = message
         self.mcp_servers = mcp_servers if mcp_servers is not None else {}
         self.tools = tools if tools is not None else ToolFunctions()
-        # 初始化通知渲染器
-        self.notification = NotificationRenderer(console)
+        # 初始化渲染器
+        self.notification_display = NotificationRenderer(console)
+        self.info_display = InfoRenderer(console)
 
     async def print_chat_info(self):
-        from rich.panel import Panel
-
+        """打印聊天信息面板"""
         tools_info = (
             "[bold]Using Tools[/bold]: "
             + ",".join([one.name for one in self.tools.tool_function_list])
@@ -65,15 +66,20 @@ class Context:
         else:
             mcp_info = "[bold]Using MCP Servers[/bold]: None"
 
-        chat_info = await self.current_chat.info + "\n" + tools_info + "\n" + mcp_info
-
-        self.console.print(
-            Panel(chat_info, title="Chat Info", expand=True),
-            style="info",
-        )
+        chat_info = await self.current_chat.info
+        self.info_display.chat_info(chat_info, tools_info, mcp_info)
 
     def print_tool_info(self, description: str):
-        from rich.panel import Panel
+        """打印工具信息面板"""
+        # TODO: 打印当前的工具信息
+        self.info_display.tool_info(description)
 
-        self.console.print()
-        self.console.print(Panel(f"🧰 {description}", expand=False), style="warning")
+    def print_instruction(self):
+        """打印系统指令"""
+        self.info_display.instruction(self.current_chat.instruction)
+
+    def print_rule(self, title: str):
+        self.info_display.rule(title)
+
+    def print_model_settings(self):
+        self.info_display.model_settings(self.current_chat.user_model_settings)

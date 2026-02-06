@@ -98,12 +98,6 @@ class CommandBase:
     async def do_command_async(self) -> bool:
         return True
 
-    def print_instruction(self):
-        self.console.print(
-            f"[bold]System:[/bold] {self.context.current_chat.instruction}",
-            style="system",
-        )
-
     @property
     def doc_title(self) -> str:
         return ""

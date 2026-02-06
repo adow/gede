@@ -26,7 +26,7 @@ class SelectLLMCommand(CommandBase):
     def get_model_path_value_list(self):
         pass
 
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         import inquirer
 
         cmd = "/select-llm"
@@ -54,12 +54,9 @@ class SelectLLMCommand(CommandBase):
                 self.context.current_chat.model_path = model_path
                 # Reset user model settings when switching models
                 self.context.current_chat.user_model_settings = ModelSettings()
-                self.console.print(
-                    f"Using {model_path} now",
-                    style="info",
-                )
+                self.context.notification_display.info(f"Using {model_path} now")
             else:
-                self.console.print("No LLM model selected.", style="warning")
+                self.context.notification_display.warning("No LLM model selected.")
             return False
 
         return True
@@ -83,11 +80,13 @@ class SetMessageNumCommand(CommandBase):
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
             if not args.isdigit():
-                self.console.print("Please input a valid number.", style="warning")
+                self.context.notification_display.warning(
+                    "Please input a valid number."
+                )
                 return False
             num = int(args)
             self.context.current_chat.message_num_in_context = num
-            self.console.print(f"Set message number in context to {num}", style="info")
+            self.context.notification_display.info(f"Set message num to {num}")
             return False
         return True
 
@@ -209,12 +208,14 @@ class SetModelSettingsCommand(CommandBase):
                         self.context.current_chat.user_model_settings.reasoning.summary = value
                     return False
 
-                self.console.print(
-                    f"Unknown model settings key ({key})", style="warning"
+                self.context.notification_display.warning(
+                    f"Unknown model settings key ({key})"
                 )
             except Exception as e:
                 logger.exception("Set model settings error: %s", e)
-                self.console.print(f"Set model settings error: {e}", style="danger")
+                self.context.notification_display.error(
+                    f"Set model settings error: {e}"
+                )
 
             return False
 
@@ -236,14 +237,7 @@ class SetModelSettingsCommand(CommandBase):
 class GetModelSettingsCommand(CommandBase):
     def do_command(self) -> bool:
         if self.message == "/get-model-settings":
-            settings = self.context.current_chat.model_settings.to_json_dict()
-            self.console.print(
-                Panel(
-                    json.dumps(settings, indent=2, ensure_ascii=False),
-                    title="Model Settings",
-                ),
-                style="info",
-            )
+            self.context.print_model_settings()
             return False
         return True
 
@@ -269,17 +263,21 @@ class SetModelReasoningCommand(CommandBase):
             allow_levels = ["minimal", "low", "medium", "high", "off", "auto"]
 
             if args not in allow_levels:
-                self.console.print(
-                    f"Invalid reasoning effort level. Choose from {','.join(allow_levels)}.",
-                    style="warning",
+                self.context.notification_display.warning(
+                    f"Invalid reasoning effort level. Choose from {','.join(allow_levels)}."
                 )
                 return False
             effort = cast(ReasoningEffort, args)
             try:
-                self.context.current_chat.set_model_reasoning(effort=effort)
-                self.console.print(f"Set reasoning effort to {effort}", style="info")
+                # TODO: set model reasoning
+                # self.context.current_chat.set_model_reasoning(effort=effort)
+                self.context.notification_display.info(
+                    f"Set reasoning effort to {effort}"
+                )
             except Exception as e:
-                self.console.print(e, style="danger")
+                self.context.notification_display.error(
+                    f"Set reasoning effort error: {e}"
+                )
             return False
         return True
 

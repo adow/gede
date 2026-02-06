@@ -16,8 +16,8 @@ from ..chatcore import loaded_instructions
 
 class SetInstructionCommand(CommandBase):
     async def get_multiline_input(self):
-        self.context.console.print(
-            "[dim]Multi-line mode. Press Esc+Enter to submit.[/dim]"
+        self.context.notification_display.info(
+            "Multi-line mode. Press Esc+Enter to submit."
         )
         with patch_stdout():
             message = await self.context.prompt_session.prompt_async(
@@ -39,7 +39,7 @@ class SetInstructionCommand(CommandBase):
                     args = await self.get_multiline_input()
             if args:
                 self.context.current_chat.set_instruction(args)
-                self.print_instruction()
+                self.context.print_instruction()
             return False
         return True
 
@@ -59,7 +59,7 @@ class SetInstructionCommand(CommandBase):
 class GetInstructionCommand(CommandBase):
     def do_command(self) -> bool:
         if self.message == "/get-instruction":
-            self.print_instruction()
+            self.context.print_instruction()
             return False
         return True
 
@@ -91,7 +91,7 @@ class SelectInstructionCommand(CommandBase):
             if answers and "Instruction" in answers:
                 instruction = answers["Instruction"]
                 self.context.current_chat.set_instruction(instruction)
-                self.print_instruction()
+                self.context.print_instruction()
 
             return False
         return True

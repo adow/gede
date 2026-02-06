@@ -12,15 +12,15 @@ from .common import cleanup_screen
 
 
 class NewPublicChatCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         if self.message == "/new":
             from ..chatcore2 import ChatModel
 
             self.context.current_chat = ChatModel(is_private=False)
-            self.console.rule("NEW CHAT")
-            # self.context.print_chat_info()
-            self.print_instruction()
-            self.console.print()
+            self.context.print_rule("NEW CHAT")
+            await self.context.print_chat_info()
+            self.context.print_instruction()
+            self.context.info_display.new_line()
             return False
         return True
 
@@ -38,15 +38,15 @@ class NewPublicChatCommand(CommandBase):
 
 
 class NewPrivateChatCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         if self.message == "/new-private":
             from ..chatcore2 import ChatModel
 
             self.context.current_chat = ChatModel(is_private=True)
-            self.console.rule("NEW CHAT (Private)")
-            # self.context.print_chat_info()
-            self.print_instruction()
-            self.console.print()
+            self.context.info_display.rule("NEW CHAT (Private)")
+            await self.context.print_chat_info()
+            self.context.print_instruction()
+            self.context.info_display.new_line()
             return False
         return True
 
@@ -64,9 +64,9 @@ class NewPrivateChatCommand(CommandBase):
 
 
 class QuitCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         if self.message == "/quit":
-            self.console.print("Exiting chat...", style="dim")
+            self.context.notification_display.info("Goodbye!")
             if self.context.current_chat.is_private:
                 cleanup_screen()
             sys.exit(0)
@@ -87,9 +87,9 @@ class QuitCommand(CommandBase):
 
 
 class ChatInfoCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         if self.message == "/chat-info":
-            # self.context.print_chat_info()
+            await self.context.print_chat_info()
             return False
         return True
 
@@ -107,7 +107,7 @@ class ChatInfoCommand(CommandBase):
 
 
 class CloneChatCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         from copy import deepcopy
 
         command = "/clone-chat"
@@ -121,12 +121,12 @@ class CloneChatCommand(CommandBase):
             clone_chat.message_num_in_context = old_chat.message_num_in_context
             clone_chat.user_model_settings = deepcopy(old_chat.user_model_settings)
             self.context.current_chat = clone_chat
-            self.console.rule(
+            self.context.print_rule(
                 f"NEW CHAT{' (Private)' if clone_chat.is_private else ''}"
             )
-            # self.context.print_chat_info()
-            self.print_instruction()
-            self.console.print()
+            await self.context.print_chat_info()
+            self.context.print_instruction()
+            self.context.info_display.new_line()
             return False
         return True
 

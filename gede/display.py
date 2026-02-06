@@ -3,6 +3,7 @@
 # display.py - Message rendering and display management
 #
 
+import json
 from typing import Optional, Union
 from rich.console import Console
 from rich.live import Live
@@ -18,6 +19,7 @@ from my_llmkit.chat import (
     ChatCompletionStreamToolCallResultEvent,
     ChatCompletionStreamUsageEvent,
 )
+from my_llmkit.chat.model_settings import ModelSettings
 
 # 定义流式事件的联合类型
 StreamEvent = Union[
@@ -293,6 +295,114 @@ class NotificationRenderer:
             message: 提示信息文本
         """
         self.console.print(message, style=self.STYLES["dim"])
+
+
+class InfoRenderer:
+    """处理聊天信息、工具信息、指令等信息面板的显示
+
+    专注于各类信息面板的渲染，与 MessageRenderer 和 NotificationRenderer 形成
+    完整的显示层架构。
+    """
+
+    # 样式配置
+    STYLES = {
+        "info": "info",
+        "warning": "warning",
+        "system": "system",
+    }
+
+    def __init__(self, console: Console):
+        """初始化信息渲染器
+
+        Args:
+            console: Rich Console实例，用于输出显示
+        """
+        self.console = console
+
+    def chat_info(self, chat_info: str, tools_info: str, mcp_info: str):
+        """显示聊天信息面板
+
+        Args:
+            chat_info: 聊天会话信息
+            tools_info: 工具使用信息
+            mcp_info: MCP 服务器信息
+        """
+        full_info = f"{chat_info}\n{tools_info}\n{mcp_info}"
+        self.console.print(
+            Panel(full_info, title="Chat Info", expand=True),
+            style=self.STYLES["info"],
+        )
+
+    def tool_info(self, description: str):
+        """显示工具调用信息面板
+
+        Args:
+            description: 工具调用描述
+        """
+        self.console.print()
+        self.console.print(
+            Panel(f"🧰 {description}", expand=False), style=self.STYLES["warning"]
+        )
+
+    def instruction(self, instruction: str):
+        """显示系统指令
+
+        Args:
+            instruction: 系统指令文本
+        """
+        self.console.print(
+            f"[bold]System:[/bold] {instruction}",
+            style=self.STYLES["system"],
+        )
+
+    def rule(self, title: str):
+        """显示分割线
+
+        Args:
+            title: 分割线标题
+        """
+        self.console.rule(title)
+
+    def new_line(self):
+        """显示空行"""
+        self.console.print()
+
+    def command_help(self, title: str, subtitle: str, description: str):
+        """显示命令帮助信息
+
+        Args:
+            title: 命令标题
+            description: 命令描述
+        """
+        self.console.print(
+            Panel(f"{description}", title=title, expand=False),
+            style=self.STYLES["info"],
+        )
+        self.console.print(
+            Panel(
+                description,
+                title=title,
+                subtitle=subtitle,
+                expand=True,
+                padding=(1, 2),
+            ),
+        )
+
+    def model_settings(self, model_settings: ModelSettings):
+        """显示模型设置信息
+
+        Args:
+            model_settings: 模型设置信息文本
+        """
+
+        settings = model_settings.to_json_dict()
+        self.console.print(
+            Panel(
+                json.dumps(settings, indent=2, ensure_ascii=False),
+                title="Model Settings",
+            ),
+            style="info",
+        )
 
 
 # tests
