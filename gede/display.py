@@ -262,7 +262,8 @@ class NotificationRenderer:
         Args:
             message: 提示信息文本
         """
-        self.console.print(f"ℹ️  {message}", style=self.STYLES["info"])
+        self.console.print(f"• {message}", style=self.STYLES["info"])
+        # self.console.print(f"❁ {message}", style=self.STYLES["info"])
 
     def success(self, message: str):
         """显示成功信息
@@ -278,7 +279,8 @@ class NotificationRenderer:
         Args:
             message: 警告信息文本
         """
-        self.console.print(f"⚠️  {message}", style=self.STYLES["warning"])
+        self.console.print(f"▴ {message}", style=self.STYLES["warning"])
+        # self.console.print(f"• {message}", style=self.STYLES["warning"])
 
     def error(self, message: str):
         """显示错误信息
@@ -375,17 +377,8 @@ class InfoRenderer:
             description: 命令描述
         """
         self.console.print(
-            Panel(f"{description}", title=title, expand=False),
+            Panel(f"{description}", title=title, expand=False, padding=(1, 2)),
             style=self.STYLES["info"],
-        )
-        self.console.print(
-            Panel(
-                description,
-                title=title,
-                subtitle=subtitle,
-                expand=True,
-                padding=(1, 2),
-            ),
         )
 
     def model_settings(self, model_settings: ModelSettings):

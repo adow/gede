@@ -5,11 +5,13 @@
 #
 
 from typing import Optional
+from pathlib import Path
 
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.patch_stdout import patch_stdout
 from rich.prompt import Prompt
 
+from ..top import gede_dir
 from .base import CommandBase
 from ..chatcore import (
     load_chats_files,
@@ -211,3 +213,45 @@ class LoadPrivateChatCommand(CommandBase):
     @property
     def command_hint(self) -> Optional[str | tuple[str, ...]]:
         return "/load-private-chat"
+
+
+class ExportCommand(CommandBase):
+    async def do_command_async(self) -> bool:
+        cmd = "/export"
+        if self.message.startswith(cmd):
+            filepath = self.message[len(cmd) :].strip()
+            if not filepath:
+                self.context.notification_display.warning(
+                    "Please input a valid file path."
+                )
+                return False
+            path = Path(filepath).expanduser()
+            if path.is_absolute():
+                if not path.parent.exists():
+                    self.context.notification_display.warning(
+                        "Parent folder not exists."
+                    )
+                    return False
+            else:
+                export_dir = Path(gede_dir()) / "chats" / "exports"
+                export_dir.mkdir(parents=True, exist_ok=True)
+                path = export_dir / path
+                path.parent.mkdir(parents=True, exist_ok=True)
+            # TODO: export chat
+            # exporter = ExportChat(self.context.current_chat)
+            # exporter.export_txt(path)
+            # self.context.console.print(f"Exported chat to {str(path)}", style="info")
+            return False
+        return True
+
+    @property
+    def command_hint(self) -> Optional[str | tuple[str, ...]]:
+        return "/export"
+
+    @property
+    def doc_title(self) -> str:
+        return "/export <FILEPATH> \nExport the current chat to a specified file"
+
+    @property
+    def doc_description(self) -> str:
+        return """Export the current chat to a specified file in TXT format. Provide the FILEPATH where you want to save the exported chat. If a relative path is provided, the chat will be saved in the 'chats/exports' directory (default: ~/.gede/chats/exports)."""

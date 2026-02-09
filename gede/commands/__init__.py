@@ -33,6 +33,7 @@ from .file_commands import (
     SaveCommand,
     LoadChatCommand,
     LoadPrivateChatCommand,
+    ExportCommand,
 )
 from .tool_commands import (
     SelectToolsCommand,
@@ -42,7 +43,6 @@ from .other_commands import (
     CleanupCommand,
     SelectPromptCommand,
     HelpCommand,
-    ExportCommand,
 )
 
 

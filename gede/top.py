@@ -57,3 +57,17 @@ def gede_data_dir():
     if not os.path.exists(data_dir):
         os.makedirs(data_dir)
     return data_dir
+
+
+def gede_instructions_dir():
+    instruction_dir = os.path.join(gede_dir(), "instructions")
+    if not os.path.exists(instruction_dir):
+        os.makedirs(instruction_dir)
+    return instruction_dir
+
+
+def gede_prompts_dir():
+    prompts_dir = os.path.join(gede_dir(), "prompts")
+    if not os.path.exists(prompts_dir):
+        os.makedirs(prompts_dir)
+    return prompts_dir

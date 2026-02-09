@@ -23,9 +23,6 @@ from my_llmkit.chat.model_settings import ModelSettings
 
 
 class SelectLLMCommand(CommandBase):
-    def get_model_path_value_list(self):
-        pass
-
     async def do_command_async(self) -> bool:
         import inquirer
 
@@ -38,6 +35,7 @@ class SelectLLMCommand(CommandBase):
             if provider:
                 path_list = [one for one in path_list if provider in one[1]]
             if not path_list:
+                self.context.notification_display.warning("No LLM models available.")
                 return False
             question = [
                 inquirer.List(
@@ -75,7 +73,7 @@ class SelectLLMCommand(CommandBase):
 
 
 class SetMessageNumCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         cmd = "/set-message-num"
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
@@ -104,7 +102,7 @@ class SetMessageNumCommand(CommandBase):
 
 
 class SetModelSettingsCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         cmd = "/set-model-settings"
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
@@ -255,7 +253,7 @@ class GetModelSettingsCommand(CommandBase):
 
 
 class SetModelReasoningCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         command = "/set-model-reasoning"
         if self.message.startswith(command):
             args = self.message[len(command) :].strip() or "off"

@@ -4,18 +4,18 @@
 # Other miscellaneous commands
 #
 
+import os
 from pathlib import Path
 from typing import Optional
 
 from rich.panel import Panel
 
 from .base import CommandBase
-from ..top import gede_dir
-from ..chatcore import ExportChat, loaded_prompts
+from ..top import gede_dir, gede_prompts_dir, logger
 
 
 class CleanupCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         from .common import cleanup_screen
 
         if self.message == "/cleanup":
@@ -37,11 +37,30 @@ class CleanupCommand(CommandBase):
 
 
 class SelectPromptCommand(CommandBase):
-    def do_command(self) -> bool:
+    def load_prompts(self):
+        prompts_dir = gede_prompts_dir()
+        if not os.path.exists(prompts_dir):
+            os.makedirs(prompts_dir)
+            file_path = os.path.join(prompts_dir, "hello.txt")
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write("Hello.")
+
+        prompts: list[str] = []
+        for filename in os.listdir(prompts_dir):
+            if filename.endswith(".txt") or filename.endswith(".md"):
+                filepath = os.path.join(prompts_dir, filename)
+                with open(filepath, "r") as f:
+                    content = f.read().strip()
+                    if content:
+                        prompts.append(content)
+        logger.debug(f"Loaded {len(prompts)} prompts from {prompts_dir}")
+        return prompts
+
+    async def do_command_async(self) -> bool:
         import inquirer
 
         if self.message == "/select-prompt":
-            prompts = loaded_prompts
+            prompts = self.load_prompts()
             question = [
                 inquirer.List(
                     "Prompt",
@@ -75,7 +94,7 @@ class SelectPromptCommand(CommandBase):
 
 
 class HelpCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         from ..top import VERSION
 
         cmd = "/help"
@@ -211,7 +230,7 @@ class HelpCommand(CommandBase):
                 output += "\n\n[dim]Use '/help KEYWORD' to search for specific commands.[/dim]"
 
             self.context.info_display.command_help(
-                title="[BOLD]Gede Command Help[/BOLD]",
+                title="[bold]Gede Command Help[/bold]",
                 subtitle=f"[dim]Version: {VERSION}[/dim]",
                 description=output,
             )
@@ -233,45 +252,3 @@ If KEYWORD is provided, only commands containing the keyword will be shown.
     @property
     def command_hint(self) -> Optional[str | tuple[str, ...]]:
         return "/help"
-
-
-class ExportCommand(CommandBase):
-    def do_command(self) -> bool:
-        cmd = "/export"
-        if self.message.startswith(cmd):
-            filepath = self.message[len(cmd) :].strip()
-            if not filepath:
-                self.context.notification_display.warning(
-                    "Please input a valid file path."
-                )
-                return False
-            path = Path(filepath).expanduser()
-            if path.is_absolute():
-                if not path.parent.exists():
-                    self.context.notification_display.warning(
-                        "Parent folder not exists."
-                    )
-                    return False
-            else:
-                export_dir = Path(gede_dir()) / "chats" / "exports"
-                export_dir.mkdir(parents=True, exist_ok=True)
-                path = export_dir / path
-                path.parent.mkdir(parents=True, exist_ok=True)
-            # TODO: export chat
-            # exporter = ExportChat(self.context.current_chat)
-            # exporter.export_txt(path)
-            # self.context.console.print(f"Exported chat to {str(path)}", style="info")
-            return False
-        return True
-
-    @property
-    def command_hint(self) -> Optional[str | tuple[str, ...]]:
-        return "/export"
-
-    @property
-    def doc_title(self) -> str:
-        return "/export <FILEPATH> \nExport the current chat to a specified file"
-
-    @property
-    def doc_description(self) -> str:
-        return """Export the current chat to a specified file in TXT format. Provide the FILEPATH where you want to save the exported chat. If a relative path is provided, the chat will be saved in the 'chats/exports' directory (default: ~/.gede/chats/exports)."""

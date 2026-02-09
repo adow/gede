@@ -36,7 +36,7 @@ from .chatcore2 import ChatModel
 from .llm.tools.tools import get_tools
 from .profiles import get_profile
 from .context import Context
-from .llm.providers2 import get_provider_from_model_path
+from .llm.providers2 import get_provider_from_model_path, prepare_models
 from .display import MessageRenderer, NotificationRenderer
 
 
@@ -109,7 +109,9 @@ async def chat(context: Context):
     provider = get_provider_from_model_path(model_path)
     if not provider:
         logger.error(f"Provider not found for model_path: {model_path}")
-        context.notification_display.error(f"找不到模型路径对应的 Provider: {model_path}")
+        context.notification_display.error(
+            f"找不到模型路径对应的 Provider: {model_path}"
+        )
         return
 
     # 创建消息渲染器
@@ -143,6 +145,7 @@ async def run_main():
     style = create_prompt_style()
     session = PromptSession()
 
+    await prepare_models()
     current_chat = ChatModel()
 
     context = Context(
@@ -155,7 +158,10 @@ async def run_main():
 
     while True:
         message = await get_input_message(
-            completer=completer, session=session, style=style
+            completer=completer,
+            session=session,
+            style=style,
+            is_private=context.current_chat.is_private,
         )
 
         console.print()

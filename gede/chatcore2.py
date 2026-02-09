@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-# chatcore.py
+# chatcore2.py
 #
 
 import os
