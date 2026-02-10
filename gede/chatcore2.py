@@ -329,5 +329,110 @@ class ChatModel:
                 return None
 
 
-# TODO: 读取 instructions 列表
-# TODO: 读取 prompts 列表
+class ExportChat:
+    def __init__(self, chat: ChatModel):
+        self.chat = chat
+
+    async def export_txt(self, filepath: Path) -> bool:
+        """Export chat record as TXT file"""
+        try:
+            txt_dir = os.path.dirname(filepath)
+            if txt_dir and not os.path.exists(txt_dir):
+                os.makedirs(txt_dir)
+
+            with open(filepath, "w", encoding="utf-8") as f:
+                # Write title and metadata
+                f.write(f"{self.chat.title}\n")
+                f.write("=" * 80 + "\n\n")
+
+                model_info = await self.chat.model
+
+                meta_text = (
+                    f"Model: {model_info.provider_name}:{model_info.model_name}\n"
+                )
+                meta_text += (
+                    f"Export Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                )
+                f.write(meta_text)
+                f.write("-" * 80 + "\n\n")
+
+                # Write message content
+                for message in self.chat.messages:
+                    role = message.role
+                    content = ""
+                    if isinstance(message.content, list):
+                        for one_content in message.content:
+                            content += (
+                                json.dumps(one_content.to_dict(), ensure_ascii=False)
+                                + "\n"
+                            )
+                    elif isinstance(message.content, str):
+                        content = message.content
+
+                    # Skip over system messages
+                    if role == "system":
+                        continue
+
+                    # Write role identifier
+                    role_label = {"user": "USER", "assistant": "ASSISTANT"}.get(
+                        role, role.upper()
+                    )
+
+                    f.write(f"【{role_label}】\n")
+
+                    # Write message content (preserve original markdown format)
+                    content_str = str(content)
+                    f.write(content_str)
+                    f.write("\n\n")
+                    f.write("-" * 80 + "\n\n")
+
+            logger.info(f"Successfully exported chat to {filepath}")
+            return True
+
+        except Exception as e:
+            logger.error(f"Failed to export chat to TXT: {str(e)}")
+            return False
+
+
+def load_private_chats_files():
+    chat_dir = os.path.join(gede_dir(), "chats", "private")
+    if not os.path.exists(chat_dir):
+        os.makedirs(chat_dir)
+    files: list[str] = []
+    for filename in os.listdir(chat_dir):
+        if filename.endswith(".json"):
+            files.append(filename)
+    logger.debug(f"Loaded {len(files)} chat files from {chat_dir}")
+    return sorted(files, reverse=True)
+
+
+def load_public_chats_files():
+    chat_dir = os.path.join(gede_dir(), "chats", "public")
+    if not os.path.exists(chat_dir):
+        os.makedirs(chat_dir)
+    # Each item contains (label, value)
+    file_title_list: list[tuple[str, str]] = []
+    for filename in os.listdir(chat_dir):
+        if filename.endswith(".json"):
+            title = "Untitled"
+
+            # Read file content, get the first user message as title
+            with open(os.path.join(chat_dir, filename), "r") as f:
+                content = f.read()
+                try:
+                    chat_data = json.loads(content)
+                except Exception as error:
+                    logger.warning(f"Failed to load chat file {filename}: {str(error)}")
+                    continue
+                title = chat_data.get("title", "Untitled")
+                if title == "" or title == "New Chat" or title == "Untitled":
+                    messages = chat_data.get("messages", [])
+                    for one_message in messages:
+                        if one_message.get("role") == "user":
+                            title = one_message.get("content", "Untitled")
+                            break
+
+            title = filename + ": " + title[:30]
+            file_title_list.append((title, filename))
+    logger.debug(f"Loaded {len(file_title_list)} chat files from {chat_dir}")
+    return sorted(file_title_list, key=lambda x: x[1], reverse=True)

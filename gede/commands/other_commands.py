@@ -124,12 +124,12 @@ class HelpCommand(CommandBase):
                 SaveCommand,
                 LoadChatCommand,
                 LoadPrivateChatCommand,
+                ExportCommand,
             )
             from .tool_commands import SelectToolsCommand, SelectMCPCommand
             from .other_commands import (
                 CleanupCommand,
                 SelectPromptCommand,
-                ExportCommand,
             )
 
             keywords = self.message[len(cmd) :].strip()

@@ -13,16 +13,12 @@ from rich.prompt import Prompt
 
 from ..top import gede_dir
 from .base import CommandBase
-from ..chatcore import (
-    load_chats_files,
-    load_chats_files_2,
-)
+from ..chatcore2 import ExportChat, load_private_chats_files, load_public_chats_files
 
 
 class PublicChatFileCompleter(Completer):
     def get_completions(self, document, complete_event):
-        # files = load_chats_files()
-        files = load_chats_files_2()
+        files = load_public_chats_files()
         text = document.text.lower()
         for one in files:
             if text in one[1].lower():
@@ -33,7 +29,7 @@ class PublicChatFileCompleter(Completer):
 
 class PrivateChatFileCompleter(Completer):
     def get_completions(self, document, complete_event):
-        files = load_chats_files(is_private=True)
+        files = load_private_chats_files()
         text = document.text.lower()
         for one in files:
             if text in one.lower():
@@ -237,10 +233,9 @@ class ExportCommand(CommandBase):
                 export_dir.mkdir(parents=True, exist_ok=True)
                 path = export_dir / path
                 path.parent.mkdir(parents=True, exist_ok=True)
-            # TODO: export chat
-            # exporter = ExportChat(self.context.current_chat)
-            # exporter.export_txt(path)
-            # self.context.console.print(f"Exported chat to {str(path)}", style="info")
+            exporter = ExportChat(self.context.current_chat)
+            await exporter.export_txt(path)
+            self.context.notification_display.success(f"Exported chat to {str(path)}")
             return False
         return True
 
