@@ -9,6 +9,7 @@ import asyncio
 import unicodedata
 import argparse
 from contextlib import AsyncExitStack
+from typing import Optional
 
 from agents.mcp import MCPServer
 from openai.types.responses import (
@@ -29,15 +30,17 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.patch_stdout import patch_stdout
 from pyfiglet import figlet_format
 
+from my_llmkit.chat.tools import ToolFunctions
+
 from .top import logger, console, VERSION, gede_dir, gede_cache_dir
 from . import config
 from .commands import do_command, get_command_hints
 from .chatcore2 import ChatModel
-from .llm.tools.tools import get_tools
 from .profiles import get_profile
 from .context import Context
 from .llm.providers2 import get_provider_from_model_path, prepare_models
 from .display import MessageRenderer, NotificationRenderer
+from .llm.tools.tools_2 import get_tools
 
 
 def clean_unicode_text(text):
@@ -119,7 +122,12 @@ async def chat(context: Context):
     renderer.show_loading("Assistant is thinking")
 
     chat_client = provider.get_chat_client(model_info.model_id)
-    runner = chat_client.run_stream(messages=input_message)
+
+    tools: Optional[ToolFunctions] = None
+    if context.tools:
+        tools = get_tools(*context.tools)
+
+    runner = chat_client.run_stream(messages=input_message, tools=tools)
 
     full_answer_buffer = ""
     full_reasoning_buffer = ""

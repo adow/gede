@@ -31,7 +31,7 @@ class Context:
 
     mcp_servers: dict[str, MCPServerBase] = field(default_factory=dict)
 
-    tools: ToolFunctions = field(default_factory=ToolFunctions)
+    tools: list[str] = field(default_factory=list)
 
     def __init__(
         self,
@@ -39,15 +39,15 @@ class Context:
         prompt_session: PromptSession,
         current_chat: "ChatModel",
         message: Optional[str] = None,
+        tools: list[str] = [],
         mcp_servers: Optional[dict[str, MCPServerBase]] = None,
-        tools: Optional[ToolFunctions] = None,
     ):
         self.console = console
         self.prompt_session = prompt_session
         self.current_chat = current_chat
         self.message = message
         self.mcp_servers = mcp_servers if mcp_servers is not None else {}
-        self.tools = tools if tools is not None else ToolFunctions()
+        self.tools = tools
         # 初始化渲染器
         self.notification_display = NotificationRenderer(console)
         self.info_display = InfoRenderer(console)
@@ -55,8 +55,7 @@ class Context:
     async def print_chat_info(self):
         """打印聊天信息面板"""
         tools_info = (
-            "[bold]Using Tools[/bold]: "
-            + ",".join([one.name for one in self.tools.tool_function_list])
+            "[bold]Using Tools[/bold]: " + ",".join(self.tools)
             if self.tools
             else "None"
         )

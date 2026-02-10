@@ -179,7 +179,7 @@ class MessageRenderer:
         )
         self.console.print()
         self.console.print(
-            Panel(f"🧰 {tool_description}", expand=False), style=self.STYLES["tool"]
+            Panel(f"‣ {tool_description}", expand=False), style=self.STYLES["tool"]
         )
         return None
 
@@ -214,7 +214,7 @@ class MessageRenderer:
         self.console.print()
         usage = event.usage
         self.console.print(
-            f"Input {usage.prompt_tokens}, Reasoning {usage.reasoning_tokens}, Output {usage.completion_tokens}, Total {usage.total_tokens}, Cached {usage.cached_tokens} ",
+            f"• Input {usage.prompt_tokens}, Reasoning {usage.reasoning_tokens}, Output {usage.completion_tokens}, Total {usage.total_tokens}, Cached {usage.cached_tokens} ",
             style=self.STYLES["usage"],
         )
         return None

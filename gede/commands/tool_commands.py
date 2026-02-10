@@ -9,14 +9,11 @@ from typing import Optional, List, Any
 import inquirer
 
 from .base import CommandBase
+from ..llm.tools.tools_2 import AVAILABLE_INNER_TOOLS_SELECTOR
 
 
 class SelectToolsCommand(CommandBase):
-    def do_command(self) -> bool:
-        from ..llm.tools.tools import (
-            AVAILABLE_INNER_TOOLS_SELECTOR,
-        )
-
+    async def do_command_async(self) -> bool:
         command = "/select-tools"
         if self.message == command:
             question = [
