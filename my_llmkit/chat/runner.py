@@ -9,6 +9,8 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional, Type, Union, TYPE_CHECKING
 
+logger = logging.getLogger(__name__)
+
 from pydantic import BaseModel
 
 from ..mcp.mcp_client import MCPServerType
@@ -45,7 +47,7 @@ class ChatCompletionResult:
                 return self.response_format.model_validate(data)
             return data
         except Exception as e:
-            logging.error(f"Error parsing result: {e}")
+            logger.error(f"Error parsing result: {e}")
             return None
 
 
@@ -73,7 +75,7 @@ class ChatCompletionStreamRunner:
         current_round = 0
 
         while current_round < self.max_rounds:
-            logging.info("========== Round: %s =========", current_round)
+            logger.info("========== Round: %s =========", current_round)
             current_round += 1
 
             # 调用模型
@@ -116,5 +118,5 @@ class ChatCompletionStreamRunner:
 
             return data
         except Exception as e:
-            logging.error(f"Error parsing result: {e}")
+            logger.error(f"Error parsing result: {e}")
             return None

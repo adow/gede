@@ -3,11 +3,13 @@
 #
 from datetime import datetime, timezone
 
+import logging
 import httpx
 from agents import function_tool, RunContextWrapper
-from ...top import logger
 from rich.panel import Panel
 from ...commands import CommandContext
+
+logger = logging.getLogger(__name__)
 
 
 async def read_url(url: str):

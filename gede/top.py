@@ -23,6 +23,7 @@ logger.setLevel(logging.INFO)
 logger.addHandler(rh)
 
 agent_logger = logging.getLogger("agents")
+agent_logger.setLevel(logging.INFO)
 agent_logger.addHandler(rh)
 
 custom_theme = Theme(

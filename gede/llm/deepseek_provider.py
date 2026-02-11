@@ -3,12 +3,14 @@
 #
 
 import os
+import logging
 
 from agents import ModelSettings
 import httpx
 from openai import AsyncClient
 from .llm_provider import LLMProviderBase, LLMModel, ReasoningEffortType
-from ..top import logger
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
 BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")

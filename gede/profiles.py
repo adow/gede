@@ -7,10 +7,13 @@
 
 import os
 import json
+import logging
 from typing import Optional, Dict, List
 from pydantic import BaseModel
 
-from .top import logger, gede_config_dir
+from .top import gede_config_dir
+
+logger = logging.getLogger(__name__)
 
 
 class Profile(BaseModel):

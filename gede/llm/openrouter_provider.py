@@ -4,13 +4,15 @@
 #
 
 import os
+import logging
 
 import httpx
 from openai import AsyncClient
 from agents import ModelSettings
 from . import common_model_settings
 from .llm_provider import LLMProviderBase, LLMModel
-from ..top import logger
+
+logger = logging.getLogger(__name__)
 
 
 API_KEY = os.getenv("OPENROUTER_API_KEY")

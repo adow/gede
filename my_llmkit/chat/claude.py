@@ -6,6 +6,8 @@ import json
 import logging
 from typing import Any, AsyncIterator, Optional, Type, Union
 
+logger = logging.getLogger(__name__)
+
 import anthropic
 from pydantic import BaseModel
 
@@ -210,7 +212,7 @@ class ClaudeChatCompletion(LLMChatCompletion):
                 kwargs["output_format"] = response_format
                 kwargs["betas"] = ["structured-outputs-2025-11-13"]
             else:
-                logging.error(
+                logger.error(
                     "Anthropic Claude only supports Pydantic BaseModel as response_format."
                 )
 
@@ -293,7 +295,7 @@ class ClaudeChatCompletion(LLMChatCompletion):
         else:
             response = await self.client.messages.create(**kwargs)
 
-        logging.debug(
+        logger.debug(
             "Claude Response: %s\n",
             json.dumps(response.model_dump(), indent=2, ensure_ascii=False),
         )

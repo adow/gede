@@ -3,12 +3,14 @@
 #
 
 import os
+import logging
 
 import httpx
 from openai import AsyncClient
 from .llm_provider import LLMProviderBase, LLMModel
-from ..top import logger
 from . import common_model_settings
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("AI302_API_KEY", "")
 BASE_URL = os.getenv("AI302_BASE_URL", "https://api.302ai.cn/v1")

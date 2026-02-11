@@ -5,6 +5,7 @@
 
 import os
 import json
+import logging
 import asyncio
 import unicodedata
 import argparse
@@ -33,7 +34,6 @@ from my_llmkit.chat.tools import ToolFunctions
 from my_llmkit.mcp.mcp_config import get_mcp_servers
 
 from .top import (
-    logger,
     console,
     VERSION,
     gede_dir,
@@ -48,6 +48,8 @@ from .context import Context
 from .llm.providers2 import get_provider_from_model_path, prepare_models
 from .display import MessageRenderer, NotificationRenderer
 from .llm.tools.tools_2 import get_tools
+
+logger = logging.getLogger(__name__)
 
 
 def clean_unicode_text(text):
@@ -239,6 +241,6 @@ async def run_main():
 if __name__ == "__main__":
     import logging
 
-    logging.getLogger().setLevel(logging.DEBUG)
-    logger.setLevel(logging.DEBUG)
+    logging.getLogger("gede").setLevel(logging.DEBUG)
+    logging.getLogger("my_llmkit").setLevel(logging.DEBUG)
     asyncio.run(run_main())

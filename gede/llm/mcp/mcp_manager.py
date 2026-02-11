@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 import os
 import sys
+import logging
 from typing import Optional, Union, Any
 
 import asyncio
@@ -23,8 +24,9 @@ from agents.mcp import (
     MCPServerStreamableHttpParams,
 )
 from rich.console import Console
-from ...top import logger
 from ...config import get_config_dir
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass

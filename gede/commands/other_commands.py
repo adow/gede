@@ -5,13 +5,16 @@
 #
 
 import os
+import logging
 from pathlib import Path
 from typing import Optional
 
 from rich.panel import Panel
 
 from .base import CommandBase
-from ..top import gede_dir, gede_prompts_dir, logger
+from ..top import gede_dir, gede_prompts_dir
+
+logger = logging.getLogger(__name__)
 
 
 class CleanupCommand(CommandBase):

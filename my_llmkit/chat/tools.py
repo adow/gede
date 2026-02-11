@@ -7,6 +7,8 @@ import json
 import logging
 from typing import Callable, Optional
 
+logger = logging.getLogger(__name__)
+
 from agents.function_schema import function_schema
 
 from ..mcp.mcp_client import MCPServerType
@@ -94,16 +96,16 @@ class ToolExecutor:
         names = [one for one in function_name.split("_", maxsplit=3) if one.strip()]
         if len(names) < 3:
             error = f"Invalid MCP tool name: {function_name}"
-            logging.error(error)
+            logger.error(error)
             return f"Error: {error}", error
 
         _, server_name, tool_name = names
-        logging.info(f"Calling MCP Tool: Server={server_name}, Tool={tool_name}")
+        logger.info(f"Calling MCP Tool: Server={server_name}, Tool={tool_name}")
 
         server = self.get_mcp_server(server_name)
         if not server:
             error = f"MCP Server {server_name} not found"
-            logging.error(error)
+            logger.error(error)
             return f"Error: {error}", error
 
         try:
@@ -112,7 +114,7 @@ class ToolExecutor:
             return result.model_dump_json(), None
         except Exception as e:
             error = f"Error calling MCP tool {tool_name}: {e}"
-            logging.error(error)
+            logger.error(error)
             return f"Error: {error}", error
 
     async def _execute_builtin_tool(
@@ -125,7 +127,7 @@ class ToolExecutor:
             return f"Error: {error}", error
 
         try:
-            logging.info(f"Executing tool: {function_name}")
+            logger.info(f"Executing tool: {function_name}")
             kwargs = json.loads(function_args)
             result = func(**kwargs)
 
@@ -137,5 +139,5 @@ class ToolExecutor:
             return result, None
         except Exception as e:
             error = f"Error executing {function_name}: {e}"
-            logging.error(error)
+            logger.error(error)
             return f"Error: {str(e)}", error

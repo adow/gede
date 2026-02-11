@@ -6,6 +6,8 @@ import json
 import logging
 from typing import Any, AsyncIterator, Optional, Type, Union
 
+logger = logging.getLogger(__name__)
+
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionToolUnionParam
 from pydantic import BaseModel
@@ -181,7 +183,7 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
             tool_calls_accumulator: dict[int, UnifiedToolCall] = {}
 
             async for chunk in response:
-                logging.debug(
+                logger.debug(
                     "OpenAI Chunk: %s\n",
                     json.dumps(chunk.model_dump(), indent=2, ensure_ascii=False),
                 )
@@ -362,11 +364,11 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
         mcp_tools = await self._convert_mcp_tools(mcp_servers) if mcp_servers else []
         full_tools = openai_tools + mcp_tools
 
-        logging.debug(
+        logger.debug(
             "OpenAI Input Messages: %s\n",
             json.dumps(openai_messages, indent=2, ensure_ascii=False),
         )
-        logging.debug(
+        logger.debug(
             "Full Tools: %s\n", json.dumps(full_tools, indent=2, ensure_ascii=False)
         )
 
@@ -472,7 +474,7 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
         )
 
         response = await self.client.chat.completions.create(**kwargs)
-        logging.debug(
+        logger.debug(
             "OpenAI Response: %s\n",
             json.dumps(response.model_dump(), indent=2, ensure_ascii=False),
         )

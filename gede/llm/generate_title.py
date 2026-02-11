@@ -1,6 +1,7 @@
 # coding= utf-8
 
 import os
+import logging
 from typing import Optional
 
 from agents import (
@@ -10,8 +11,9 @@ from agents import (
     Runner,
     TResponseInputItem,
 )
-from ..top import logger
 from .providers import get_llm_model
+
+logger = logging.getLogger(__name__)
 
 
 MODEL = os.getenv("GENERATE_TITLE_MODEL", "")

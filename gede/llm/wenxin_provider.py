@@ -3,13 +3,15 @@
 #
 
 import os
+import logging
 from typing import Optional, Any
 
 import httpx
 from openai import AsyncClient
 from agents import ModelSettings
 from .llm_provider import LLMProviderBase, LLMModel, WebSearchType
-from ..top import logger
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("WENXIN_API_KEY", "")
 BASE_URL = os.getenv("WENXIN_BASE_URL", "https://qianfan.baidubce.com/v2")

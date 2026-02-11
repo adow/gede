@@ -2,8 +2,10 @@
 #
 #
 
+import logging
 import httpx
-from ...top import logger
+
+logger = logging.getLogger(__name__)
 
 
 async def read_url_tool(url: str):

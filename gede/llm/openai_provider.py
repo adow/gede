@@ -3,13 +3,15 @@
 #
 
 import os
+import logging
 
 import httpx
 from openai import AsyncClient
 from agents import ModelSettings
 
 from .llm_provider import LLMProviderBase, LLMModel
-from ..top import logger
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("OPENAI_API_KEY", "")
 BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")

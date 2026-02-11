@@ -3,6 +3,7 @@
 #
 
 import os
+import logging
 from typing import Optional, Any
 
 import httpx
@@ -10,7 +11,8 @@ from openai import AsyncClient
 from agents import ModelSettings
 from openai.types.shared import ReasoningEffort
 from .llm_provider import LLMProviderBase, LLMModel, ReasoningEffortType, WebSearchType
-from ..top import logger
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("QWEN_API_KEY", "")
 BASE_URL = os.getenv(

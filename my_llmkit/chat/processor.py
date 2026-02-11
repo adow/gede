@@ -7,6 +7,8 @@ import logging
 from dataclasses import asdict
 from typing import Any, AsyncIterator, Optional
 
+logger = logging.getLogger(__name__)
+
 from ..mcp.mcp_client import MCPServerType
 from .events import (
     Usage,
@@ -50,7 +52,7 @@ class ChatCompletionStreamProcessor:
         final_tool_calls: list[UnifiedToolCall] = []
 
         async for chunk in self.response:
-            logging.debug(
+            logger.debug(
                 "Unified Chunk: %s\n",
                 json.dumps(asdict(chunk), indent=2, ensure_ascii=False),
             )

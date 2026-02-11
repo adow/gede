@@ -5,6 +5,7 @@
 #
 
 import json
+import logging
 from typing import Optional, cast, Literal, Any
 
 from rich.panel import Panel
@@ -17,9 +18,10 @@ from ..llm.providers2.providers import (
     MODEL_DATA,
     get_model_path_value_list,
 )
-from ..top import logger
 from ..chatcore import WebSearchType
 from my_llmkit.chat.model_settings import ModelSettings
+
+logger = logging.getLogger(__name__)
 
 
 class SelectLLMCommand(CommandBase):

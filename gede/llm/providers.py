@@ -4,6 +4,7 @@
 #
 
 import os
+import logging
 import asyncio
 import concurrent.futures
 from datetime import datetime
@@ -16,7 +17,7 @@ from pydantic import BaseModel, Field, TypeAdapter
 
 from openai import AsyncClient
 
-from ..top import logger, gede_dir
+from ..top import gede_dir
 from .llm_provider import LLMProviderBase, LLMModel
 from .voice_engine_provider import VoiceEngineProvider
 from .openrouter_provider import OpenRouterProvider
@@ -25,6 +26,8 @@ from .kimi_provider import KimiProvider
 from .deepseek_provider import DeepSeekProvider
 from .wenxin_provider import WenxinProvider
 from .qwen_provider import QwenProvider
+
+logger = logging.getLogger(__name__)
 from .openai_provider import OpenAIProvider
 from .anthropic_provider import AnthropicProvider
 

@@ -3,12 +3,14 @@
 #
 
 import os
+import logging
 from typing import Optional
 import httpx
 from my_llmkit.models import get_model_info, ModelInfo
 
 from .base import LLMProviderBase
-from ...top import logger
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("ZENMUX_API_KEY")
 API_BASE_URL = os.getenv("ZENMUX_BASE_URL", "https://zenmux.ai/api/v1")

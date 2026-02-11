@@ -9,10 +9,12 @@ from pydantic import BaseModel, TypeAdapter
 
 from my_llmkit.models import get_model_info
 
-from ...top import logger, gede_data_dir
+from ...top import gede_data_dir
 from .base import LLMProviderBase
 from .openrouter import OpenRouterProvider
 from .zenmux import ZenMuxProvider
+
+logger = logging.getLogger(__name__)
 
 PROVIDERS: list[LLMProviderBase] = [
     OpenRouterProvider(),
@@ -199,6 +201,6 @@ if __name__ == "__main__":
     import asyncio
 
     logger.setLevel(logging.DEBUG)
-    logging.getLogger().setLevel(logging.DEBUG)
+    logging.getLogger("my_llmkit").setLevel(logging.DEBUG)
 
     asyncio.run(tests())

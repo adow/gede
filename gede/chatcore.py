@@ -5,6 +5,7 @@
 
 import os
 import json
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -16,7 +17,7 @@ from agents import (
     ModelSettings,
 )
 
-from .top import logger, gede_dir
+from .top import gede_dir
 from .llm.providers import (
     GetLLMModelResult,
     get_llm_model,
@@ -26,6 +27,8 @@ from .llm.providers import (
 from .llm.llm_provider import ReasoningEffortType, WebSearchType
 from .encrypt import encrypt_aes, decrypt_aes
 from .llm.generate_title import generate_title
+
+logger = logging.getLogger(__name__)
 
 
 def gede_instructions_dir():

@@ -6,6 +6,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import AsyncIterator, Optional, Type, Union
 
+
 from .model_settings import ModelSettings
 from pydantic import BaseModel
 
@@ -14,6 +15,8 @@ from .events import Usage
 from .runner import ChatCompletionResult, ChatCompletionStreamRunner
 from .tools import ToolExecutor, ToolFunctions
 from .types import UnifiedChunk, UnifiedMessage, UnifiedResponse
+
+logger = logging.getLogger(__name__)
 
 
 class LLMChatCompletion(ABC):
@@ -96,7 +99,7 @@ class LLMChatCompletion(ABC):
         tool_executor = ToolExecutor(tools, mcp_servers)
 
         while current_round < max_rounds:
-            logging.info("========== Round: %s =========", current_round)
+            logger.info("========== Round: %s =========", current_round)
             current_round += 1
 
             # 调用模型（非流式）

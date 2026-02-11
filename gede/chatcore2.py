@@ -5,6 +5,7 @@
 
 import os
 import json
+import logging
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -16,10 +17,12 @@ from my_llmkit.chat import UnifiedMessage, ContentBlock
 from my_llmkit.models import ModelInfo, get_model_info
 
 
-from .top import logger, gede_dir, DEFAULT_MODEL_PATH
+from .top import gede_dir, DEFAULT_MODEL_PATH
 
 from .encrypt import encrypt_aes, decrypt_aes
 from .llm.generate_title import generate_title
+
+logger = logging.getLogger(__name__)
 
 
 def gede_instructions_dir():

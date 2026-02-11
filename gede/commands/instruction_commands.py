@@ -5,14 +5,17 @@
 #
 
 import os
+import logging
 from typing import Optional
 
 import inquirer
 from prompt_toolkit.patch_stdout import patch_stdout
 from rich.prompt import Prompt
 
-from ..top import gede_instructions_dir, logger
+from ..top import gede_instructions_dir
 from .base import CommandBase
+
+logger = logging.getLogger(__name__)
 
 
 class SetInstructionCommand(CommandBase):

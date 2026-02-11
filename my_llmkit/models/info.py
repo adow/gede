@@ -59,6 +59,8 @@ from typing import Optional, Literal, Any
 import httpx
 from pydantic import BaseModel, TypeAdapter
 
+logger = logging.getLogger(__name__)
+
 _cache_dir = "/tmp/my_llmkit/"
 
 
@@ -158,11 +160,11 @@ async def update_modep_info_from_litellm():
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
-            logging.error(f"Failed to fetch model info list: {response.status_code}")
+            logger.error(f"Failed to fetch model info list: {response.status_code}")
             return None
         rows = response.json()
         if not rows:
-            logging.error("No data found in model info list.")
+            logger.error("No data found in model info list.")
             return None
 
         del rows["sample_spec"]
@@ -235,7 +237,7 @@ async def update_model_info_from_models_dev():
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
-            logging.error(
+            logger.error(
                 f"Failed to fetch models.dev info list: {response.status_code}"
             )
             return None
@@ -279,11 +281,11 @@ async def update_model_info_from_myllmkit(url: str):
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
-            logging.error(f"Failed to fetch model info list: {response.status_code}")
+            logger.error(f"Failed to fetch model info list: {response.status_code}")
             return None
         rows = response.json()
         if not rows:
-            logging.error("No data found in model info list.")
+            logger.error("No data found in model info list.")
             return None
 
         models_cache: dict[str, ModelInfo] = ModelInfoDictType.validate_json(rows)
@@ -310,7 +312,7 @@ async def read_model_info_dict():
 
     filename = _cache_file()
     if not os.path.exists(filename):
-        logging.debug("Model info cache file not found, creating new cache.")
+        logger.debug("Model info cache file not found, creating new cache.")
         await update_model_info_cache()
     else:
         # Get the file's modification time
@@ -318,7 +320,7 @@ async def read_model_info_dict():
         current_time = datetime.now().timestamp()
 
         # Load existing cache first
-        logging.debug("Loading model info from cache.")
+        logger.debug("Loading model info from cache.")
         with open(filename, "r") as f:
             data = f.read()
             if not data:
@@ -329,16 +331,16 @@ async def read_model_info_dict():
 
         # Update cache in background if more than 32 hours have passed
         if current_time - file_mtime > 32 * 60 * 60:
-            logging.debug(
+            logger.debug(
                 "Model info cache file is outdated, updating cache in background."
             )
 
             async def background_update():
                 try:
                     await update_model_info_cache()
-                    logging.debug("Background cache update completed successfully.")
+                    logger.debug("Background cache update completed successfully.")
                 except Exception as e:
-                    logging.exception(
+                    logger.exception(
                         f"Error updating model info cache in background: {e}"
                     )
 
@@ -346,7 +348,7 @@ async def read_model_info_dict():
 
         return MODEL_INFO_DICT_CACHE
 
-    logging.debug("Loading model info from cache.")
+    logger.debug("Loading model info from cache.")
 
     # read from cache file
     with open(filename, "r") as f:
@@ -364,7 +366,7 @@ def read_model_info_background():
         try:
             await read_model_info_dict()
         except Exception as e:
-            logging.exception(f"Error reading model info dict in background: {e}")
+            logger.exception(f"Error reading model info dict in background: {e}")
             return None
 
     asyncio.create_task(wrapper())
@@ -393,5 +395,7 @@ async def tests():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.DEBUG)
+    from .log import logger as pkg_logger
+
+    pkg_logger.setLevel(logging.DEBUG)
     asyncio.run(tests())

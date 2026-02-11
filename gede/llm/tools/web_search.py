@@ -13,10 +13,7 @@ import httpx
 from agents import function_tool, RunContextWrapper
 from ...commands import CommandContext
 
-
-from ...top import (
-    logger,
-)
+logger = logging.getLogger(__name__)
 
 
 class WebSearchResult(BaseModel):

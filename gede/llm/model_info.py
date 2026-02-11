@@ -8,6 +8,7 @@
 # However, the model names used here are not exactly the same as litellm, so some model information may not correspond.
 #
 import os
+import logging
 
 import json
 import threading
@@ -17,8 +18,9 @@ from typing import Optional, Literal, Any
 import httpx
 from pydantic import BaseModel, TypeAdapter
 
+from ..top import gede_dir
 
-from ..top import logger, gede_dir
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "ModelInfo",

@@ -1,5 +1,6 @@
 # coding=utf-8
 
+import logging
 from dataclasses import dataclass, field
 from typing import Literal, Optional, TypeAlias, cast, Any
 
@@ -7,7 +8,7 @@ from openai import AsyncClient
 from openai.types.shared import Reasoning, ReasoningEffort
 from agents import ModelSettings
 
-from ..top import logger
+logger = logging.getLogger(__name__)
 
 ReasoningEffortType: TypeAlias = ReasoningEffort | Literal["off", "auto"]
 WebSearchType: TypeAlias = Literal["on", "off", "auto"]

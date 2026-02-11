@@ -4,12 +4,15 @@
 # Tool-related commands
 #
 
+import logging
 from typing import Optional, List, Any
 
 import inquirer
 
 from .base import CommandBase
 from ..llm.tools.tools_2 import AVAILABLE_INNER_TOOLS_SELECTOR
+
+logger = logging.getLogger(__name__)
 
 
 class SelectToolsCommand(CommandBase):
@@ -56,8 +59,6 @@ class SelectToolsCommand(CommandBase):
 
 class SelectMCPCommand(CommandBase):
     async def connect(self, selected_mcp: list[str]):
-        from ..top import logger
-
         for name, item in self.context.mcp_manager.server_items.items():
             if name in selected_mcp:
                 if not item.selected:

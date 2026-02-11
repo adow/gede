@@ -3,12 +3,14 @@
 #
 
 import os
+import logging
 
 import httpx
 from openai import AsyncClient, Client
 from agents import ModelSettings
 from .llm_provider import LLMProviderBase, LLMModel, ReasoningEffortType
-from ..top import logger
+
+logger = logging.getLogger(__name__)
 
 API_KEY = os.getenv("MOONSHOT_API_KEY", "")
 BASE_URL = os.getenv("MOONSHOT_BASE_URL", "https://api.moonshot.cn/v1/")

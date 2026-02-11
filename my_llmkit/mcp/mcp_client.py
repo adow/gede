@@ -10,19 +10,11 @@ from typing import Optional, Any
 from contextlib import AsyncExitStack
 from datetime import timedelta
 
-from rich.logging import RichHandler
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.types import Tool, CallToolResult
 
-# Set log format
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-rh = RichHandler()
-rh.setFormatter(formatter)
 logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
-logger.setLevel(logging.DEBUG)
-logger.addHandler(rh)
 
 
 # ==================== MCP Client 基类 ====================

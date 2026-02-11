@@ -6,9 +6,12 @@
 #
 
 import os
+import logging
 from dotenv import load_dotenv
 
-from .top import logger, gede_config_dir
+from .top import gede_config_dir
+
+logger = logging.getLogger(__name__)
 
 
 def get_config_filepath():

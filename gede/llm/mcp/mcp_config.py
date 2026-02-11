@@ -1,12 +1,14 @@
 # coding=utf-8
 
 import os
+import logging
 from typing import Dict, List, Optional, Union, Literal, Any
 from dataclasses import dataclass
 from pathlib import Path
 import json
-from ...top import logger
 from ...config import get_config_dir
+
+logger = logging.getLogger(__name__)
 
 
 # Server type definitions

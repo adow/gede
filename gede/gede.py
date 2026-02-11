@@ -5,6 +5,7 @@
 
 import os
 import json
+import logging
 import asyncio
 import unicodedata
 import argparse
@@ -32,7 +33,7 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.patch_stdout import patch_stdout
 from pyfiglet import figlet_format
 
-from .top import logger, console, VERSION, gede_dir
+from .top import console, VERSION, gede_dir
 from . import config
 from .commands import do_command, CommandConext, get_command_hints
 from .chatcore import ChatModel
@@ -40,6 +41,8 @@ from .llm.model_info import read_model_info_dict
 from .llm.providers import get_llm_model, get_model_path_value_list
 from .llm.tools.tools import get_tools
 from .profiles import get_profile
+
+logger = logging.getLogger(__name__)
 
 
 def clean_unicode_text(text):
