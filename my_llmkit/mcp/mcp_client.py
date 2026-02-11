@@ -332,25 +332,16 @@ class MCPHttpServer(MCPServerBase):
             terminate_on_close: 关闭时是否终止会话
         """
         try:
-            from mcp.client.streamable_http import streamable_http_client
-            import httpx
+            from mcp.client.streamable_http import streamablehttp_client
 
             logger.debug(f"正在连接到 StreamableHTTP MCP Server: {url}")
 
-            # 创建 httpx 客户端
-            http_client = httpx.AsyncClient(
-                headers=headers or {},
-                timeout=httpx.Timeout(timeout),
-            )
-
-            # 将 http_client 添加到 exit_stack 管理，确保自动清理
-            await self.exit_stack.enter_async_context(http_client)
-
-            # 使用 exit_stack 管理 streamable_http_client 的生命周期
+            # 使用 exit_stack 管理 streamablehttp_client 的生命周期
             http_transport = await self.exit_stack.enter_async_context(
-                streamable_http_client(
+                streamablehttp_client(
                     url=url,
-                    http_client=http_client,
+                    headers=headers,
+                    timeout=timeout,
                     terminate_on_close=terminate_on_close,
                 )
             )

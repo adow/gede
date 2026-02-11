@@ -241,6 +241,6 @@ async def run_main():
 if __name__ == "__main__":
     import logging
 
-    logging.getLogger("gede").setLevel(logging.DEBUG)
-    logging.getLogger("my_llmkit").setLevel(logging.DEBUG)
+    logging.getLogger("gede").setLevel(logging.INFO)
+    logging.getLogger("my_llmkit").setLevel(logging.INFO)
     asyncio.run(run_main())
