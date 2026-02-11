@@ -29,7 +29,7 @@ class Context:
     notification_display: NotificationRenderer = field(init=False)
     info_display: InfoRenderer = field(init=False)
 
-    mcp_servers: dict[str, MCPServerBase] = field(default_factory=dict)
+    mcp_servers: dict[str, MCPServerType] = field(default_factory=dict)
 
     tools: list[str] = field(default_factory=list)
 
@@ -40,7 +40,7 @@ class Context:
         current_chat: "ChatModel",
         message: Optional[str] = None,
         tools: list[str] = [],
-        mcp_servers: Optional[dict[str, MCPServerBase]] = None,
+        mcp_servers: Optional[dict[str, MCPServerType]] = None,
     ):
         self.console = console
         self.prompt_session = prompt_session

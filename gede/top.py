@@ -71,3 +71,15 @@ def gede_prompts_dir():
     if not os.path.exists(prompts_dir):
         os.makedirs(prompts_dir)
     return prompts_dir
+
+
+def gede_config_dir():
+    config_dir = os.path.join(gede_dir(), "config")
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+    return config_dir
+
+
+def gede_mcp_config_path():
+    """返回 MCP 配置文件的完整路径"""
+    return os.path.join(gede_config_dir(), "mcp.json")

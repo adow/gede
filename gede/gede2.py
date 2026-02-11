@@ -8,7 +8,6 @@ import json
 import asyncio
 import unicodedata
 import argparse
-from contextlib import AsyncExitStack
 from typing import Optional
 
 from agents.mcp import MCPServer
@@ -31,8 +30,16 @@ from prompt_toolkit.patch_stdout import patch_stdout
 from pyfiglet import figlet_format
 
 from my_llmkit.chat.tools import ToolFunctions
+from my_llmkit.mcp.mcp_config import get_mcp_servers
 
-from .top import logger, console, VERSION, gede_dir, gede_cache_dir
+from .top import (
+    logger,
+    console,
+    VERSION,
+    gede_dir,
+    gede_cache_dir,
+    gede_mcp_config_path,
+)
 from . import config
 from .commands import do_command, get_command_hints
 from .chatcore2 import ChatModel
@@ -127,7 +134,11 @@ async def chat(context: Context):
     if context.tools:
         tools = get_tools(*context.tools)
 
-    runner = chat_client.run_stream(messages=input_message, tools=tools)
+    runner = chat_client.run_stream(
+        messages=input_message,
+        tools=tools,
+        mcp_servers=context.mcp_servers if context.mcp_servers else None,
+    )
 
     full_answer_buffer = ""
     full_reasoning_buffer = ""
@@ -156,36 +167,78 @@ async def run_main():
     await prepare_models()
     current_chat = ChatModel()
 
+    # 尝试加载 MCP 服务器配置
+    mcp_config_path = gede_mcp_config_path()
+    stack = None
+    mcp_servers = {}
+
+    if os.path.exists(mcp_config_path):
+        notification = NotificationRenderer(console)
+        try:
+            logger.debug(f"正在加载 MCP 配置: {mcp_config_path}")
+            mcp_servers, stack = await get_mcp_servers(mcp_config_path)
+            logger.debug(f"成功加载 {len(mcp_servers)} 个 MCP 服务器")
+            notification.info(f"成功加载 {len(mcp_servers)} 个 MCP 服务器")
+
+            # 显式初始化所有服务器，确保所有输出都在用户输入前完成
+            for name, server in mcp_servers.items():
+                try:
+                    tools = await server.list_tools()
+                    logger.debug(f"服务器 {name} 提供 {len(tools)} 个工具")
+                except Exception as e:
+                    logger.warning(f"初始化服务器 {name} 的工具列表失败: {e}")
+
+            # 短暂延迟，确保所有子进程的 stderr 输出完成
+            # await asyncio.sleep(0.3)
+        except Exception as e:
+            logger.warning(f"加载 MCP 配置失败: {e}")
+            notification.warning(f"MCP 配置加载失败: {e}")
+            notification.dim("继续运行但无 MCP 工具支持")
+    else:
+        logger.debug(f"MCP 配置文件不存在: {mcp_config_path}")
+
     context = Context(
-        current_chat=current_chat, console=console, prompt_session=session
+        current_chat=current_chat,
+        console=console,
+        prompt_session=session,
+        mcp_servers=mcp_servers,
     )
 
     context.notification_display.dim(
         "Tip: Type '\\' for multi-line input, or just type your message."
     )
 
-    while True:
-        message = await get_input_message(
-            completer=completer,
-            session=session,
-            style=style,
-            is_private=context.current_chat.is_private,
-        )
+    try:
+        while True:
+            message = await get_input_message(
+                completer=completer,
+                session=session,
+                style=style,
+                is_private=context.current_chat.is_private,
+            )
 
-        console.print()
-        context.message = message
-        should_continue = await do_command(context)
-        # After command execution, do not continue
-        if not should_continue:
             console.print()
-            continue
+            context.message = message
+            should_continue = await do_command(context)
+            # After command execution, do not continue
+            if not should_continue:
+                console.print()
+                continue
 
-        context.current_chat.append_user_message(message)
-        # console.print(f"You entered: {message}")
-        await chat(context)
+            context.current_chat.append_user_message(message)
+            # console.print(f"You entered: {message}")
+            await chat(context)
 
-        console.print()
+            console.print()
+    finally:
+        # 清理 MCP 服务器连接
+        if stack:
+            await stack.aclose()
 
 
 if __name__ == "__main__":
+    import logging
+
+    logging.getLogger().setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
     asyncio.run(run_main())

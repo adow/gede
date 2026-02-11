@@ -396,7 +396,7 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
             "stream": stream,
         }
 
-        if openai_tools:
+        if full_tools:
             kwargs["tools"] = full_tools
 
         if self.model_settings.reasoning:

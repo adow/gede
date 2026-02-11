@@ -6,21 +6,13 @@
 #
 
 import os
-from pathlib import Path
 from dotenv import load_dotenv
 
-from .top import logger
-
-
-def get_config_dir():
-    config_dir = os.path.join(Path.home(), ".gede", "config")
-    if not os.path.exists(config_dir):
-        os.makedirs(config_dir)
-    return config_dir
+from .top import logger, gede_config_dir
 
 
 def get_config_filepath():
-    config_dir = get_config_dir()
+    config_dir = gede_config_dir()
     return os.path.join(config_dir, ".env")
 
 

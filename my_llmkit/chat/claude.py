@@ -198,7 +198,7 @@ class ClaudeChatCompletion(LLMChatCompletion):
         if system_prompt:
             kwargs["system"] = system_prompt
 
-        if anthropic_tools:
+        if full_tools:
             kwargs["tools"] = full_tools
 
         if response_format:

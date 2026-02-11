@@ -10,11 +10,19 @@ from typing import Optional, Any
 from contextlib import AsyncExitStack
 from datetime import timedelta
 
+from rich.logging import RichHandler
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 from mcp.types import Tool, CallToolResult
 
+# Set log format
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+rh = RichHandler()
+rh.setFormatter(formatter)
 logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
+logger.addHandler(rh)
 
 
 # ==================== MCP Client 基类 ====================
@@ -69,7 +77,7 @@ class MCPServerBase(ABC):
         try:
             result = await self.session.list_tools()
             self._tools_cache = result.tools
-            logger.info(f"可用工具: {[tool.name for tool in self._tools_cache]}")
+            logger.debug(f"可用工具: {[tool.name for tool in self._tools_cache]}")
             return self._tools_cache
         except Exception as e:
             logger.error(f"获取工具列表失败: {e}")
@@ -162,7 +170,7 @@ class MCPStdioServer(MCPServerBase):
                 env=env,
             )
 
-            logger.info(
+            logger.debug(
                 f"正在连接到 Stdio MCP Server: {command} {' '.join(args or [])}"
             )
 
@@ -250,7 +258,7 @@ class MCPSSEServer(MCPServerBase):
         try:
             from mcp.client.sse import sse_client
 
-            logger.info(f"正在连接到 SSE MCP Server: {url}")
+            logger.debug(f"正在连接到 SSE MCP Server: {url}")
 
             # 使用 exit_stack 管理 sse_client 的生命周期
             sse_transport = await self.exit_stack.enter_async_context(
@@ -335,7 +343,7 @@ class MCPHttpServer(MCPServerBase):
             from mcp.client.streamable_http import streamable_http_client
             import httpx
 
-            logger.info(f"正在连接到 StreamableHTTP MCP Server: {url}")
+            logger.debug(f"正在连接到 StreamableHTTP MCP Server: {url}")
 
             # 创建 httpx 客户端
             http_client = httpx.AsyncClient(
@@ -366,7 +374,7 @@ class MCPHttpServer(MCPServerBase):
 
             # 获取会话 ID（用于重连或调试）
             self.session_id = get_session_id()
-            logger.info(f"会话 ID: {self.session_id}")
+            logger.debug(f"会话 ID: {self.session_id}")
 
         except Exception as e:
             logger.error(f"连接 StreamableHTTP MCP Server 失败: {e}")

@@ -164,7 +164,7 @@ class HelpCommand(CommandBase):
                 ],
                 "Tools & MCP": [
                     SelectToolsCommand,
-                    SelectMCPCommand,
+                    # SelectMCPCommand,
                 ],
                 "Utility": [
                     CleanupCommand,
