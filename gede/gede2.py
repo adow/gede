@@ -33,12 +33,12 @@ from my_llmkit.mcp.mcp_config import get_mcp_servers
 
 from .top import (
     console,
-    VERSION,
     gede_dir,
     gede_cache_dir,
     gede_mcp_config_path,
 )
 from . import config
+from .version import get_app_version
 from .commands import do_command, get_command_hints
 from .chatcore2 import ChatModel
 from .profiles import get_profile
@@ -159,7 +159,7 @@ async def chat(context: Context):
 
 
 async def run_main():
-    render_startup_logo(console=console, app_name="Gede", version=VERSION)
+    render_startup_logo(console=console, app_name="Gede", version=get_app_version())
 
     history = InMemoryHistory()
     completer = WordCompleter(get_command_hints(), ignore_case=True, sentence=True)

@@ -33,8 +33,9 @@ from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.patch_stdout import patch_stdout
 from pyfiglet import figlet_format
 
-from .top import console, VERSION, gede_dir
+from .top import console, gede_dir
 from . import config
+from .version import get_app_version
 from .commands import do_command, CommandConext, get_command_hints
 from .chatcore import ChatModel
 from .llm.model_info import read_model_info_dict
@@ -536,10 +537,11 @@ def main():
             )
             return
 
+    app_version = get_app_version()
     console.print(
         Panel(
             figlet_format("Gede", font="slant"),
-            title=f"Version: {VERSION}",
+            title=f"Version: {app_version}",
             subtitle="Type /help for commands",
             expand=False,
         )

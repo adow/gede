@@ -396,7 +396,13 @@ class InfoRenderer:
             description: 命令描述
         """
         self.console.print(
-            Panel(f"{description}", title=title, expand=False, padding=(1, 2)),
+            Panel(
+                f"{description}",
+                title=title,
+                subtitle=subtitle,
+                expand=False,
+                padding=(1, 2),
+            ),
             style=self.STYLES["info"],
         )
 

@@ -13,6 +13,7 @@ from rich.panel import Panel
 
 from .base import CommandBase
 from ..top import gede_dir, gede_prompts_dir
+from ..version import get_app_version
 
 logger = logging.getLogger(__name__)
 
@@ -98,8 +99,6 @@ class SelectPromptCommand(CommandBase):
 
 class HelpCommand(CommandBase):
     async def do_command_async(self) -> bool:
-        from ..top import VERSION
-
         cmd = "/help"
         if self.message.startswith(cmd):
             # Import here to avoid circular imports
@@ -234,7 +233,7 @@ class HelpCommand(CommandBase):
 
             self.context.info_display.command_help(
                 title="[bold]Gede Command Help[/bold]",
-                subtitle=f"[dim]Version: {VERSION}[/dim]",
+                subtitle=f"[dim]Version: {get_app_version()}[/dim]",
                 description=output,
             )
 
