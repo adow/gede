@@ -10,6 +10,7 @@ from rich.live import Live
 from rich.spinner import Spinner
 from rich.text import Text
 from rich.panel import Panel
+from pyfiglet import figlet_format
 
 # 导入事件类型
 from my_llmkit.chat import (
@@ -29,6 +30,24 @@ StreamEvent = Union[
     ChatCompletionStreamToolCallResultEvent,
     ChatCompletionStreamUsageEvent,
 ]
+
+
+def render_startup_logo(
+    console: Console,
+    app_name: str = "Gede",
+    version: str = "",
+    subtitle: str = "Type /help for commands",
+):
+    """Render startup logo panel for CLI entrypoints."""
+    title = f"Version: {version}" if version else "Version"
+    console.print(
+        Panel(
+            figlet_format(app_name, font="slant"),
+            title=title,
+            subtitle=subtitle,
+            expand=False,
+        )
+    )
 
 
 class MessageRenderer:

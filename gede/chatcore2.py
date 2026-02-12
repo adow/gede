@@ -1,6 +1,6 @@
 # coding=utf-8
 #
-# chatcore2.py
+# chatcore2.py - Chat session core class
 #
 
 import os

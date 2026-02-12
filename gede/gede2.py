@@ -28,8 +28,6 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.patch_stdout import patch_stdout
-from pyfiglet import figlet_format
-
 from my_llmkit.chat.tools import ToolFunctions
 from my_llmkit.mcp.mcp_config import get_mcp_servers
 
@@ -46,7 +44,7 @@ from .chatcore2 import ChatModel
 from .profiles import get_profile
 from .context import Context
 from .llm.providers2 import get_provider_from_model_path, prepare_models
-from .display import MessageRenderer, NotificationRenderer
+from .display import MessageRenderer, NotificationRenderer, render_startup_logo
 from .llm.tools.tools_2 import get_tools
 
 logger = logging.getLogger(__name__)
@@ -161,6 +159,8 @@ async def chat(context: Context):
 
 
 async def run_main():
+    render_startup_logo(console=console, app_name="Gede", version=VERSION)
+
     history = InMemoryHistory()
     completer = WordCompleter(get_command_hints(), ignore_case=True, sentence=True)
     style = create_prompt_style()
