@@ -57,7 +57,7 @@ class Context:
         tools_info = (
             "[bold]Using Tools[/bold]: " + ",".join(self.tools)
             if self.tools
-            else "None"
+            else "[bold]Using Tools[/bold]: None"
         )
         server_names = self.mcp_servers.keys()
         if server_names:

@@ -219,6 +219,10 @@ async def run_main():
                 is_private=context.current_chat.is_private,
             )
 
+            if not message:
+                context.notification_display.warning("Input cannot be empty.")
+                continue
+
             console.print()
             context.message = message
             should_continue = await do_command(context)

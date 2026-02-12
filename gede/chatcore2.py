@@ -10,7 +10,7 @@ from pathlib import Path
 from datetime import datetime
 from typing import Optional
 from uuid import uuid4
-from dataclasses import dataclass, field, fields
+from dataclasses import dataclass, field
 
 from my_llmkit.chat.model_settings import ModelSettings
 from my_llmkit.chat import UnifiedMessage, ContentBlock
