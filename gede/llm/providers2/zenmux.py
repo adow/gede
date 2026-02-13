@@ -7,12 +7,17 @@ import logging
 from typing import Optional
 import httpx
 from my_llmkit.models import get_model_info, ModelInfo
+from my_llmkit.chat import (
+    LLMChatCompletion,
+    OpenAICompatibleChatCompletion,
+    ClaudeChatCompletion,
+)
 
 from .base import LLMProviderBase
 
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("ZENMUX_API_KEY")
+API_KEY = os.getenv("ZENMUX_API_KEY", "")
 API_BASE_URL = os.getenv("ZENMUX_BASE_URL", "https://zenmux.ai/api/v1")
 
 
@@ -21,6 +26,15 @@ class ZenMuxProvider(LLMProviderBase):
         super().__init__(
             provider_id="zenmux",
             name="ZenMux",
+        )
+
+    def get_chat_client(self, model_id: str) -> LLMChatCompletion:
+        if model_id.startswith("anthropic"):
+            return ClaudeChatCompletion(
+                api_key=API_KEY, model=model_id, api_base=API_BASE_URL
+            )
+        return OpenAICompatibleChatCompletion(
+            api_key=API_KEY, model=model_id, api_base=API_BASE_URL
         )
 
     @property
