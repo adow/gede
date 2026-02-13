@@ -20,7 +20,7 @@ from my_llmkit.models import ModelInfo, get_model_info
 from .top import gede_dir, DEFAULT_MODEL_PATH
 
 from .encrypt import encrypt_aes, decrypt_aes
-from .llm.generate_title import generate_title
+from .llm.generate_title2 import generate_title
 
 logger = logging.getLogger(__name__)
 
@@ -147,9 +147,7 @@ class ChatModel:
             )
             return
         try:
-            # TODO: implement generate_title
-            # title = await generate_title(self.messages)
-            title = "GENERATED TITLE"
+            title = await generate_title(self.messages) or "New Chat"
 
             logger.debug("Generated chat title: %s", title)
             if title:
