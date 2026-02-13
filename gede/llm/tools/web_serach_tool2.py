@@ -9,10 +9,7 @@ from typing import Optional
 from pydantic import BaseModel, TypeAdapter
 import httpx
 
-
-from ...top import (
-    logger,
-)
+logger = logging.getLogger(__name__)
 
 
 class WebSearchResult(BaseModel):
@@ -138,7 +135,7 @@ async def exa_web_search(
     return search_results
 
 
-async def web_search_tool(query: str, summary_query: str):
+async def web_search(query: str, summary_query: str):
     """
     Perform internet search, use this tool when the user's question requires the latest information from the internet.
     After obtaining search results, each content will be summarized.

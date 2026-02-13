@@ -4,7 +4,7 @@
 from datetime import datetime, timezone
 
 
-def now_tool() -> str:
+def now() -> str:
     """
     Get the current date and time, use this tool when you need to determine the current time
     Returns:

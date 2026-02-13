@@ -8,7 +8,7 @@ import httpx
 logger = logging.getLogger(__name__)
 
 
-async def read_url_tool(url: str):
+async def read_url(url: str):
     """
     Read webpage content, use this tool when you need to get information from a specified URL
     Args:

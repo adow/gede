@@ -47,7 +47,7 @@ async def generate_title(input_messages: list[UnifiedMessage]) -> Optional[str]:
         logger.warning("No valid messages to generate title")
         return
 
-    prompts = "以下是用户和语言模型的对话内容:\n\n\n\n" + prompts
+    prompts = "以下是用户和语言模型的对话内容:\n\n\n\n" + prompts[:3000]
 
     messages: list[UnifiedMessage] = [
         UnifiedMessage(role="system", content=instructions),

@@ -159,6 +159,41 @@ async def chat(context: Context):
 
 
 async def run_main():
+    parser = argparse.ArgumentParser(description="Chat with an LLM.")
+    # Parameter --log-level
+    parser.add_argument(
+        "--log-level",
+        type=str,
+        default=None,
+        choices=["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"],
+        help="Set log level (DEBUG, INFO, WARNING, ERROR, CRITICAL)",
+    )
+    # Parameter --model
+    parser.add_argument(
+        "--model",
+        type=str,
+        help="Specify default model (format: provider_id:model_id, e.g.: openai:gpt-4o)",
+    )
+    # Parameter --instruction
+    parser.add_argument(
+        "--instruction",
+        type=str,
+        help="Set system prompt (equivalent to executing /set-instruction command)",
+    )
+    # Parameter --private
+    parser.add_argument(
+        "--private",
+        action="store_true",
+        help="Start private session (equivalent to executing /new-private command)",
+    )
+    # Parameter --tools
+    parser.add_argument(
+        "--tools",
+        type=str,
+        help="Set enabled tools list (multiple tools separated by commas, e.g.: --tools web_search,now,read_page)",
+    )
+    args = parser.parse_args()
+
     render_startup_logo(console=console, app_name="Gede", version=get_app_version())
 
     history = InMemoryHistory()
@@ -167,7 +202,16 @@ async def run_main():
     session = PromptSession()
 
     await prepare_models()
-    current_chat = ChatModel()
+    current_chat = ChatModel(is_private=args.private)
+
+    # args
+    if args.model:
+        current_chat.model_path = args.model
+    if args.instruction:
+        current_chat.instruction = args.instruction
+    if args.log_level:
+        logging.getLogger("gede").setLevel(args.log_level.upper())
+        logging.getLogger("my_llmkit").setLevel(args.log_level.upper())
 
     # 尝试加载 MCP 服务器配置
     mcp_config_path = gede_mcp_config_path()
@@ -205,6 +249,10 @@ async def run_main():
         prompt_session=session,
         mcp_servers=mcp_servers,
     )
+
+    if args.tools:
+        tools = [t.strip() for t in args.tools.split(",")] if args.tools else []
+        context.tools = tools
 
     context.notification_display.dim(
         "Tip: Type '\\' for multi-line input, or just type your message."

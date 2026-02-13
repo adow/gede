@@ -1,28 +1,14 @@
 # coding=utf-8
+#
+# top.py
+# 全局配置与路径管理
+#
 
 import os
-import logging
 from pathlib import Path
 
-from rich.logging import RichHandler
 from rich.console import Console
 from rich.theme import Theme
-
-# Set log format
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-rh = RichHandler()
-rh.setFormatter(formatter)
-
-logger = logging.getLogger("gede")
-# logger.setLevel(logging.DEBUG)
-logger.setLevel(logging.INFO)
-# logger.setLevel(logging.ERROR)
-# logger.setLevel(logging.CRITICAL)
-logger.addHandler(rh)
-
-agent_logger = logging.getLogger("agents")
-agent_logger.setLevel(logging.INFO)
-agent_logger.addHandler(rh)
 
 custom_theme = Theme(
     {

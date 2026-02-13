@@ -7,12 +7,12 @@ import json
 import logging
 from typing import Callable, Optional
 
-logger = logging.getLogger(__name__)
-
 from agents.function_schema import function_schema
 
 from ..mcp.mcp_client import MCPServerType
 from .types import UnifiedToolCall, UnifiedToolParam
+
+logger = logging.getLogger(__name__)
 
 
 class ToolFunction:
