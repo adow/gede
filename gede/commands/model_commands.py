@@ -17,6 +17,11 @@ from ..llm.providers2.providers import (
     get_provider_from_model_path,
     MODEL_DATA,
     get_model_path_value_list,
+    PROVIDERS,
+    ProviderCache,
+    ModelCache,
+    save_models_to_file,
+    PATH_VALUE_LIST,
 )
 from ..chatcore import WebSearchType
 from my_llmkit.chat.model_settings import ModelSettings
@@ -72,6 +77,115 @@ class SelectLLMCommand(CommandBase):
     @property
     def command_hint(self) -> Optional[str | tuple[str, ...]]:
         return "/select-llm"
+
+
+class ManageProviderModelsCommand(CommandBase):
+    async def do_command_async(self) -> bool:
+        import inquirer
+
+        cmd = "/model-manage"
+        if not self.message.startswith(cmd):
+            return True
+
+        provider_prefix = self.message[len(cmd) :].strip()
+        if not provider_prefix:
+            self.context.notification_display.warning(
+                "Please input provider, usage: /model-manage [PROVIDER]"
+            )
+            return False
+
+        matched_providers = [
+            provider
+            for provider in PROVIDERS
+            if provider.provider_id.startswith(provider_prefix)
+        ]
+        if not matched_providers:
+            self.context.notification_display.warning(
+                f"Provider not found with prefix: {provider_prefix}"
+            )
+            return False
+
+        # Prefix conflict strategy: use the first matched provider by PROVIDERS order
+        provider = matched_providers[0]
+        provider.models = []
+        await provider.load_models()
+        if not provider.models:
+            self.context.notification_display.warning(
+                f"No available models found for provider: {provider.provider_id}"
+            )
+            return False
+
+        provider_cache = next(
+            (one for one in MODEL_DATA if one.provider_id == provider.provider_id), None
+        )
+        default_selected = (
+            [model.model_id for model in provider_cache.models] if provider_cache else []
+        )
+
+        choices: list[tuple[str, str]] = []
+        model_name_dict: dict[str, str] = {}
+        for model in provider.models:
+            model_id = model.model_id
+            model_name = model.model_name or model_id
+            model_name_dict[model_id] = model_name
+            choices.append((model_name, model_id))
+
+        answers = inquirer.prompt(
+            [
+                inquirer.Checkbox(
+                    "models",
+                    message=f"Select models to enable for {provider.provider_id} (use SPACE to select/deselect, ENTER to confirm)",
+                    choices=choices,
+                    default=default_selected,
+                )
+            ]
+        )
+        if not answers or "models" not in answers:
+            self.context.notification_display.warning("Model selection canceled.")
+            return False
+
+        selected_model_ids: list[str] = answers["models"]
+        selected_models = [
+            ModelCache(
+                model_id=model_id,
+                name=model_name_dict.get(model_id, model_id),
+                model_path=f"{provider.provider_id}:{model_id}",
+            )
+            for model_id in selected_model_ids
+        ]
+
+        if provider_cache:
+            provider_cache.models = selected_models
+        else:
+            MODEL_DATA.append(
+                ProviderCache(
+                    provider_id=provider.provider_id,
+                    name=provider.name,
+                    models=selected_models,
+                )
+            )
+
+        PATH_VALUE_LIST.clear()
+        save_models_to_file()
+
+        total_enabled = sum(len(one_provider.models) for one_provider in MODEL_DATA)
+        self.context.notification_display.info(
+            f"{provider.provider_id} enabled {len(selected_model_ids)} models"
+        )
+        self.context.notification_display.info(f"一共启用了 {total_enabled} 个模型")
+        return False
+
+    @property
+    def doc_title(self) -> str:
+        return "/model-manage [PROVIDER]\nManage enabled models for one provider"
+
+    @property
+    def doc_description(self) -> str:
+        return """Manage enabled models for a provider with prefix matching. PROVIDER is required and matched against provider_id by prefix. This command loads all available provider models, shows a multi-select checkbox list, and persists selected models to local enabled-model cache."""
+
+    @property
+    def command_hint(self) -> Optional[str | tuple[str, ...]]:
+        return "/model-manage"
 
 
 class SetMessageNumCommand(CommandBase):

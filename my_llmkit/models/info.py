@@ -395,7 +395,5 @@ async def tests():
 
 
 if __name__ == "__main__":
-    from .log import logger as pkg_logger
-
-    pkg_logger.setLevel(logging.DEBUG)
+    logger.setLevel(logging.DEBUG)
     asyncio.run(tests())

@@ -24,6 +24,7 @@ from .instruction_commands import (
 )
 from .model_commands import (
     SelectLLMCommand,
+    ManageProviderModelsCommand,
     SetMessageNumCommand,
     SetModelSettingsCommand,
     GetModelSettingsCommand,
@@ -60,6 +61,7 @@ def get_command_class_list_async() -> list[Type[CommandBase]]:
         GetInstructionCommand,
         SelectInstructionCommand,
         SelectLLMCommand,
+        ManageProviderModelsCommand,
         ChatInfoCommand,
         SetMessageNumCommand,
         CleanupCommand,
@@ -147,6 +149,7 @@ __all__ = [
     "GetInstructionCommand",
     "SelectInstructionCommand",
     "SelectLLMCommand",
+    "ManageProviderModelsCommand",
     "SetMessageNumCommand",
     "SetModelSettingsCommand",
     "GetModelSettingsCommand",

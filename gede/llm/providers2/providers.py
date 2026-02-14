@@ -49,12 +49,14 @@ def load_models_from_file():
     """
     从文件读取模型数据到全局变量 MODEL_DATA
     """
-    global MODEL_DATA
     filename = os.path.join(gede_data_dir(), "models.json")
     if os.path.exists(filename):
         with open(filename, "r", encoding="utf-8") as f:
             content = f.read()
-            MODEL_DATA = ProviderCacheListType.validate_json(content)
+            loaded_data = ProviderCacheListType.validate_json(content)
+            # Keep list identity stable for modules that import MODEL_DATA directly.
+            MODEL_DATA.clear()
+            MODEL_DATA.extend(loaded_data)
 
 
 def save_models_to_file():

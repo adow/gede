@@ -117,6 +117,7 @@ class HelpCommand(CommandBase):
             )
             from .model_commands import (
                 SelectLLMCommand,
+                ManageProviderModelsCommand,
                 SetMessageNumCommand,
                 SetModelSettingsCommand,
                 GetModelSettingsCommand,
@@ -153,6 +154,7 @@ class HelpCommand(CommandBase):
                 ],
                 "Model Settings": [
                     SelectLLMCommand,
+                    ManageProviderModelsCommand,
                     SetMessageNumCommand,
                     SetModelSettingsCommand,
                     GetModelSettingsCommand,
