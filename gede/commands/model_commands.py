@@ -89,8 +89,11 @@ class ManageProviderModelsCommand(CommandBase):
 
         provider_prefix = self.message[len(cmd) :].strip()
         if not provider_prefix:
+            available_providers = ", ".join(
+                [provider.provider_id for provider in PROVIDERS]
+            )
             self.context.notification_display.warning(
-                "Please input provider, usage: /model-manage [PROVIDER]"
+                f"Please input provider, usage: /model-manage [PROVIDER]. Available providers: {available_providers}"
             )
             return False
 
