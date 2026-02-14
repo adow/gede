@@ -76,16 +76,31 @@ async def prepare_models():
     启动的时候准备模型列表缓存
     """
     global MODEL_DATA
-    if MODEL_DATA:
-        return MODEL_DATA
-    load_models_from_file()
-    if MODEL_DATA:
-        return MODEL_DATA
+    if not MODEL_DATA:
+        load_models_from_file()
+
+    cache_by_provider: dict[str, ProviderCache] = {
+        one.provider_id: one for one in MODEL_DATA
+    }
+    changed = False
+
     for provider in PROVIDERS:
-        provider_cache = ProviderCache(
-            provider_id=provider.provider_id, name=provider.name, models=[]
-        )
+        provider_cache = cache_by_provider.get(provider.provider_id)
+        if not provider_cache:
+            provider_cache = ProviderCache(
+                provider_id=provider.provider_id, name=provider.name, models=[]
+            )
+            MODEL_DATA.append(provider_cache)
+            cache_by_provider[provider.provider_id] = provider_cache
+            changed = True
+        elif provider_cache.name != provider.name:
+            provider_cache.name = provider.name
+            changed = True
+
+        existing_model_ids = {one.model_id for one in provider_cache.models}
         for model_id in provider.default_models or []:
+            if model_id in existing_model_ids:
+                continue
             model_path = f"{provider.provider_id}:{model_id}"
             model_info = await get_model_info(model_path)
             if not model_info:
@@ -98,8 +113,11 @@ async def prepare_models():
                     model_path=model_path,
                 )
             )
-        MODEL_DATA.append(provider_cache)
-    save_models_to_file()
+            existing_model_ids.add(model_id)
+            changed = True
+
+    if changed:
+        save_models_to_file()
     return MODEL_DATA
 
 
