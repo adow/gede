@@ -122,7 +122,13 @@ class ManageProviderModelsCommand(CommandBase):
             (one for one in MODEL_DATA if one.provider_id == provider.provider_id), None
         )
         default_selected = (
-            [model.model_id for model in provider_cache.models] if provider_cache else []
+            [
+                model.model_id
+                for model in provider_cache.models
+                if not model.deleted
+            ]
+            if provider_cache
+            else []
         )
 
         choices: list[tuple[str, str]] = []
@@ -153,25 +159,41 @@ class ManageProviderModelsCommand(CommandBase):
                 model_id=model_id,
                 name=model_name_dict.get(model_id, model_id),
                 model_path=f"{provider.provider_id}:{model_id}",
+                deleted=False,
             )
             for model_id in selected_model_ids
         ]
 
+        selected_model_id_set = set(selected_model_ids)
+        deleted_default_models = [
+            ModelCache(
+                model_id=model_id,
+                name=model_name_dict.get(model_id, model_id),
+                model_path=f"{provider.provider_id}:{model_id}",
+                deleted=True,
+            )
+            for model_id in (provider.default_models or [])
+            if model_id not in selected_model_id_set
+        ]
+
         if provider_cache:
-            provider_cache.models = selected_models
+            provider_cache.models = selected_models + deleted_default_models
         else:
             MODEL_DATA.append(
                 ProviderCache(
                     provider_id=provider.provider_id,
                     name=provider.name,
-                    models=selected_models,
+                    models=selected_models + deleted_default_models,
                 )
             )
 
         PATH_VALUE_LIST.clear()
         save_models_to_file()
 
-        total_enabled = sum(len(one_provider.models) for one_provider in MODEL_DATA)
+        total_enabled = sum(
+            len([one for one in one_provider.models if not one.deleted])
+            for one_provider in MODEL_DATA
+        )
         self.context.notification_display.info(
             f"{provider.provider_id} enabled {len(selected_model_ids)} models"
         )

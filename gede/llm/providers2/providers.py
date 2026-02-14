@@ -30,6 +30,7 @@ class ModelCache(BaseModel):
     model_id: str
     name: str
     model_path: str
+    deleted: bool = False
 
     @property
     async def model_info(self):
@@ -99,7 +100,11 @@ async def prepare_models():
 
         existing_model_ids = {one.model_id for one in provider_cache.models}
         for model_id in provider.default_models or []:
-            if model_id in existing_model_ids:
+            existed_model = next(
+                (one for one in provider_cache.models if one.model_id == model_id),
+                None,
+            )
+            if existed_model:
                 continue
             model_path = f"{provider.provider_id}:{model_id}"
             model_info = await get_model_info(model_path)
@@ -111,12 +116,14 @@ async def prepare_models():
                     model_id=model_id,
                     name=model_info.model_name or model_id,
                     model_path=model_path,
+                    deleted=False,
                 )
             )
             existing_model_ids.add(model_id)
             changed = True
 
     if changed:
+        PATH_VALUE_LIST.clear()
         save_models_to_file()
     return MODEL_DATA
 
@@ -126,7 +133,15 @@ async def add_model(provider_id: str, model_id: str):
     for provider in MODEL_DATA:
         if provider.provider_id == provider_id:
             # check model exists
-            find_model = [one for one in provider.models if one.model_id == model_id]
+            find_model = next(
+                (one for one in provider.models if one.model_id == model_id), None
+            )
+            if find_model:
+                if find_model.deleted:
+                    find_model.deleted = False
+                    PATH_VALUE_LIST.clear()
+                    save_models_to_file()
+                break
             if not find_model:
                 model_path = f"{provider_id}:{model_id}"
                 model_info = await get_model_info(model_path)
@@ -138,8 +153,10 @@ async def add_model(provider_id: str, model_id: str):
                         model_id=model_id,
                         name=model_info.model_name or model_id,
                         model_path=model_path,
+                        deleted=False,
                     )
                 )
+            PATH_VALUE_LIST.clear()
             save_models_to_file()
             break
 
@@ -148,10 +165,29 @@ async def remove_model(provider_id: str, model_id: str):
     global MODEL_DATA
     for provider in MODEL_DATA:
         if provider.provider_id == provider_id:
-            # check model exists and remove
-            provider.models = [
-                one for one in provider.models if one.model_id != model_id
-            ]
+            # soft delete existing model
+            find_model = next(
+                (one for one in provider.models if one.model_id == model_id), None
+            )
+            if find_model:
+                find_model.deleted = True
+            else:
+                provider_def = get_provider_by_id(provider_id)
+                is_default_model = bool(
+                    provider_def and model_id in (provider_def.default_models or [])
+                )
+                if is_default_model:
+                    provider.models.append(
+                        ModelCache(
+                            model_id=model_id,
+                            name=model_id,
+                            model_path=f"{provider_id}:{model_id}",
+                            deleted=True,
+                        )
+                    )
+                else:
+                    return
+            PATH_VALUE_LIST.clear()
             save_models_to_file()
             break
 
@@ -201,6 +237,8 @@ def get_model_path_value_list():
         return PATH_VALUE_LIST
     for one_provider in MODEL_DATA:
         for one_model in one_provider.models:
+            if one_model.deleted:
+                continue
             name = f"{one_provider.name}:{one_model.name}"
             path = one_model.model_path
             PATH_VALUE_LIST.append((name, path))
@@ -215,6 +253,8 @@ async def tests():
     print(await prepare_models())
     for provider in MODEL_DATA:
         for model in provider.models:
+            if model.deleted:
+                continue
             info = await model.model_info
             print(f"{model.model_path} -> {info}")
 

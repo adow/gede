@@ -11,14 +11,6 @@ import unicodedata
 import argparse
 from typing import Optional
 
-from agents.mcp import MCPServer
-from openai.types.responses import (
-    ResponseReasoningSummaryTextDeltaEvent,
-    ResponseReasoningTextDeltaEvent,
-    ResponseTextDeltaEvent,
-)
-from agents import Agent, Runner, OpenAIChatCompletionsModel, Tool, set_tracing_disabled
-
 from prompt_toolkit.shortcuts import CompleteStyle
 from rich import print
 from rich.panel import Panel
@@ -33,7 +25,6 @@ from my_llmkit.mcp.mcp_config import get_mcp_servers
 
 from .top import (
     console,
-    gede_dir,
     gede_cache_dir,
     gede_mcp_config_path,
 )
