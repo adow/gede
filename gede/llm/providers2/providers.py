@@ -13,12 +13,14 @@ from ...top import gede_data_dir
 from .base import LLMProviderBase
 from .openrouter import OpenRouterProvider
 from .zenmux import ZenMuxProvider
+from .moonshot import MoonshotProvider
 
 logger = logging.getLogger(__name__)
 
 PROVIDERS: list[LLMProviderBase] = [
     OpenRouterProvider(),
     ZenMuxProvider(),
+    MoonshotProvider(),
 ]
 
 

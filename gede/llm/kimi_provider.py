@@ -5,7 +5,6 @@
 import os
 import logging
 
-import httpx
 from openai import AsyncClient, Client
 from agents import ModelSettings
 from .llm_provider import LLMProviderBase, LLMModel, ReasoningEffortType
