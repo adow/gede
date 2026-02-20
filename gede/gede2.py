@@ -20,6 +20,8 @@ from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.styles import Style
 from prompt_toolkit.formatted_text import HTML
 from prompt_toolkit.patch_stdout import patch_stdout
+
+from . import config
 from my_llmkit.chat.tools import ToolFunctions
 from my_llmkit.mcp.mcp_config import get_mcp_servers
 
@@ -28,7 +30,6 @@ from .top import (
     gede_cache_dir,
     gede_mcp_config_path,
 )
-from . import config
 from .version import get_app_version
 from .commands import do_command, get_command_hints
 from .chatcore2 import ChatModel
@@ -39,6 +40,20 @@ from .display import MessageRenderer, NotificationRenderer, render_startup_logo
 from .llm.tools.tools_2 import get_tools
 
 logger = logging.getLogger(__name__)
+
+
+def apply_app_log_level(level: str):
+    """Apply log level for app loggers."""
+    logging.getLogger("gede").setLevel(level)
+    logging.getLogger("my_llmkit").setLevel(level)
+
+
+def apply_sdk_log_level(level: str):
+    """Apply log level for SDK/network loggers."""
+    logging.getLogger("openai").setLevel(level)
+    logging.getLogger("anthropic").setLevel(level)
+    logging.getLogger("httpx").setLevel(level)
+    logging.getLogger("httpcore").setLevel(level)
 
 
 def clean_unicode_text(text):
@@ -209,10 +224,13 @@ async def run_main():
     if args.instruction:
         current_chat.instruction = args.instruction
     if args.log_level:
-        # logging.basicConfig(level=args.log_level.upper())
-        logging.getLogger("gede").setLevel(args.log_level.upper())
-        logging.getLogger("my_llmkit").setLevel(args.log_level.upper())
-        # logging.getLogger("httpx").setLevel(args.log_level.upper())
+        log_level = args.log_level.upper()
+        apply_app_log_level(log_level)
+        apply_sdk_log_level(log_level)
+    else:
+        # Keep app logs at INFO by default. SDK logs follow env vars
+        # (OPENAI_LOG / ANTHROPIC_LOG) initialized during module import.
+        apply_app_log_level("INFO")
 
     # 尝试加载 MCP 服务器配置
     mcp_config_path = gede_mcp_config_path()
@@ -292,8 +310,5 @@ async def run_main():
 
 
 if __name__ == "__main__":
-    import logging
-
-    logging.getLogger("gede").setLevel(logging.INFO)
-    logging.getLogger("my_llmkit").setLevel(logging.INFO)
+    apply_app_log_level("INFO")
     asyncio.run(run_main())

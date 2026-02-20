@@ -12,4 +12,6 @@ handler.setFormatter(formatter)
 
 logger = logging.getLogger("my_llmkit")
 logger.setLevel(logging.INFO)
-logger.addHandler(handler)
+logger.propagate = False
+if not logger.handlers:
+    logger.addHandler(handler)

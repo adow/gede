@@ -98,7 +98,9 @@ PHOENIX_COLLECTOR_ENDPOINT="https://app.phoenix.arize.com"
 # PHOENIX_COLLECTOR_ENDPOINT="https://app.phoenix.arize.com/s/your-project-token/v1/traces"
 
 # DEBUG=true
-# OPENAI_LOG="debug"
+# SDK log level defaults (effective when --log-level is not provided):
+# OPENAI_LOG="debug"      # allowed: "debug" / "info"
+# ANTHROPIC_LOG="debug"   # allowed: "debug" / "info"
             """
         f.write(default_content.strip())
         logger.info(f"Default .env file created at {env_filename}")
