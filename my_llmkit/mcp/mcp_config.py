@@ -217,7 +217,7 @@ class MCPManager:
         if not file_path.exists():
             raise FileNotFoundError(f"配置文件不存在: {file_path}")
 
-        logger.info(f"正在加载 MCP 配置文件: {file_path}")
+        logger.debug(f"正在加载 MCP 配置文件: {file_path}")
 
         try:
             with open(file_path, "r", encoding="utf-8") as f:
@@ -269,7 +269,7 @@ class MCPManager:
         # 输出统计信息
         enabled_count = len(manager.get_enabled_servers())
         total_count = len(servers)
-        logger.info(f"配置加载完成: {enabled_count}/{total_count} 个服务器已启用")
+        logger.debug(f"配置加载完成: {enabled_count}/{total_count} 个服务器已启用")
 
         return manager
 

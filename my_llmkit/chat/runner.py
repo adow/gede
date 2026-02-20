@@ -9,7 +9,6 @@ import logging
 from dataclasses import dataclass, field
 from typing import Optional, Type, Union, TYPE_CHECKING
 
-logger = logging.getLogger(__name__)
 
 from pydantic import BaseModel
 
@@ -18,6 +17,8 @@ from .events import Usage
 from .processor import ChatCompletionStreamProcessor
 from .tools import ToolFunctions
 from .types import UnifiedMessage
+
+logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
     from .base import LLMChatCompletion
@@ -75,7 +76,7 @@ class ChatCompletionStreamRunner:
         current_round = 0
 
         while current_round < self.max_rounds:
-            logger.info("========== Round: %s =========", current_round)
+            logger.debug("========== Round: %s =========", current_round)
             current_round += 1
 
             # 调用模型

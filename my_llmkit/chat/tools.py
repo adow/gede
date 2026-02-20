@@ -100,7 +100,7 @@ class ToolExecutor:
             return f"Error: {error}", error
 
         _, server_name, tool_name = names
-        logger.info(f"Calling MCP Tool: Server={server_name}, Tool={tool_name}")
+        logger.debug(f"Calling MCP Tool: Server={server_name}, Tool={tool_name}")
 
         server = self.get_mcp_server(server_name)
         if not server:
@@ -127,7 +127,7 @@ class ToolExecutor:
             return f"Error: {error}", error
 
         try:
-            logger.info(f"Executing tool: {function_name}")
+            logger.debug(f"Executing tool: {function_name}")
             kwargs = json.loads(function_args)
             result = func(**kwargs)
 
