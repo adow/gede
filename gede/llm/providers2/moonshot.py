@@ -8,6 +8,7 @@ from typing import Optional
 from openai import AsyncClient
 
 from my_llmkit.models import get_model_info
+from my_llmkit.chat.model_settings import ModelSettings
 from my_llmkit.chat import LLMChatCompletion, OpenAICompatibleChatCompletion
 
 from .base import LLMProviderBase
@@ -25,9 +26,14 @@ class MoonshotProvider(LLMProviderBase):
             name="Moonshot",
         )
 
-    def get_chat_client(self, model_id: str) -> LLMChatCompletion:
+    def get_chat_client(
+        self, model_id: str, model_settings: Optional[ModelSettings] = None
+    ) -> LLMChatCompletion:
         return OpenAICompatibleChatCompletion(
-            api_key=API_KEY, model=model_id, api_base=API_BASE_URL
+            api_key=API_KEY,
+            model=model_id,
+            api_base=API_BASE_URL,
+            model_settings=model_settings,
         )
 
     @property

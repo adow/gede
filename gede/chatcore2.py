@@ -12,6 +12,7 @@ from typing import Optional
 from uuid import uuid4
 from dataclasses import dataclass, field
 
+from gede.llm.providers2.providers import get_provider_by_id
 from my_llmkit.chat.model_settings import ModelSettings
 from my_llmkit.chat import UnifiedMessage, ContentBlock
 from my_llmkit.models import ModelInfo, get_model_info
@@ -21,6 +22,7 @@ from .top import gede_dir, DEFAULT_MODEL_PATH
 
 from .encrypt import encrypt_aes, decrypt_aes
 from .llm.generate_title2 import generate_title
+from .llm.providers2.reasoning import ReasoningEffortType
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +72,12 @@ class ChatModel:
 
     @property
     def model_settings(self) -> ModelSettings:
-        # TODO: 从 provider 获取默认设置
+        # 混合 user_model_settings 和 provider 的默认设置，user_model_settings 优先级更高
+        (provider_id, model_id) = self.model_path.split(":", maxsplit=1)
+        provider = get_provider_by_id(provider_id)
+        if provider:
+            default_settings = provider.default_model_settings(model_id)
+            return default_settings.resolve(self.user_model_settings)
         return ModelSettings()
 
     @property
@@ -328,6 +335,17 @@ class ChatModel:
             except Exception as e:
                 logger.error("Failed to load chat file %s: %s", filepath, str(e))
                 return None
+
+    # model settings
+    def set_model_reasoning(self, effort: Optional[ReasoningEffortType] = None):
+        (provider_id, model_id) = self.model_path.split(":", maxsplit=1)
+        provider = get_provider_by_id(provider_id)
+        if not provider:
+            return
+        reasoning_settings = provider.make_reasoning_setting(
+            model_id=model_id, reasoning_effort=effort
+        )
+        self.user_model_settings = self.user_model_settings.resolve(reasoning_settings)
 
 
 class ExportChat:

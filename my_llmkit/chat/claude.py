@@ -2,11 +2,17 @@
 #
 # Claude 实现
 #
+# Claude 接口没有 reasoining_effort, 只能通过 extra_body 设置思考等级
+#
+# model_settings.max_tokens = 30000
+# model_settings.extra_body = {
+#   "thinking": {"type": "enabled", "budget_tokens": 10000}
+# }
+#
 import json
 import logging
 from typing import Any, AsyncIterator, Optional, Type, Union
 
-logger = logging.getLogger(__name__)
 
 import anthropic
 from pydantic import BaseModel
@@ -26,6 +32,8 @@ from .types import (
     UnifiedToolCall,
     UnifiedUsage,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class ClaudeChatCompletion(LLMChatCompletion):
@@ -190,16 +198,25 @@ class ClaudeChatCompletion(LLMChatCompletion):
         mcp_tools = await self._convert_mcp_tools(mcp_servers) if mcp_servers else []
         full_tools = anthropic_tools + mcp_tools
 
+        logger.debug(
+            "Claude Input Messages: \n%s",
+            json.dumps(anthropic_messages, indent=2, ensure_ascii=False),
+        )
+
         # Prepare parameters
         kwargs: dict[str, Any] = {
             "model": self.model,
             "messages": anthropic_messages,
-            "max_tokens": self.model_settings.max_tokens or 4096,
+            "max_tokens": self.model_settings.max_tokens or 20000,
         }
 
         if system_prompt:
             kwargs["system"] = system_prompt
 
+        logger.debug(
+            "Full Tools for Claude: %s\n",
+            json.dumps(full_tools, indent=2, ensure_ascii=False),
+        )
         if full_tools:
             kwargs["tools"] = full_tools
 
@@ -291,8 +308,16 @@ class ClaudeChatCompletion(LLMChatCompletion):
         # 使用 beta API 以支持 structured outputs
         if "betas" in kwargs:
             betas = kwargs.pop("betas")
+            logger.debug(
+                "Claude Request: %s\n",
+                json.dumps(kwargs, indent=2, ensure_ascii=False),
+            )
             response = await self.client.beta.messages.create(**kwargs, betas=betas)
         else:
+            logger.debug(
+                "Claude request: %s\n",
+                json.dumps(kwargs, indent=2, ensure_ascii=False),
+            )
             response = await self.client.messages.create(**kwargs)
 
         logger.debug(
@@ -315,6 +340,10 @@ class ClaudeChatCompletion(LLMChatCompletion):
             tools=tools,
             mcp_servers=mcp_servers,
             response_format=response_format,
+        )
+        logger.debug(
+            "Claude request: %s\n",
+            json.dumps(kwargs, indent=2, ensure_ascii=False),
         )
 
         async def _generate():

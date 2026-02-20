@@ -122,11 +122,7 @@ class ManageProviderModelsCommand(CommandBase):
             (one for one in MODEL_DATA if one.provider_id == provider.provider_id), None
         )
         default_selected = (
-            [
-                model.model_id
-                for model in provider_cache.models
-                if not model.deleted
-            ]
+            [model.model_id for model in provider_cache.models if not model.deleted]
             if provider_cache
             else []
         )
@@ -409,7 +405,7 @@ class SetModelReasoningCommand(CommandBase):
             effort = cast(ReasoningEffort, args)
             try:
                 # TODO: set model reasoning
-                # self.context.current_chat.set_model_reasoning(effort=effort)
+                self.context.current_chat.set_model_reasoning(effort=effort)
                 self.context.notification_display.info(
                     f"Set reasoning effort to {effort}"
                 )

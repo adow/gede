@@ -118,8 +118,16 @@ async def chat(context: Context):
     # 创建消息渲染器
     renderer = MessageRenderer(console)
     renderer.show_loading("Assistant is thinking")
+    # logger.debug(
+    #     "model_settings: "
+    #     + json.dumps(
+    #         context.current_chat.model_settings.to_json_dict(), ensure_ascii=False
+    #     )
+    # )
 
-    chat_client = provider.get_chat_client(model_info.model_id)
+    chat_client = provider.get_chat_client(
+        model_info.model_id, context.current_chat.model_settings
+    )
 
     tools: Optional[ToolFunctions] = None
     if context.tools:
@@ -201,8 +209,10 @@ async def run_main():
     if args.instruction:
         current_chat.instruction = args.instruction
     if args.log_level:
+        # logging.basicConfig(level=args.log_level.upper())
         logging.getLogger("gede").setLevel(args.log_level.upper())
         logging.getLogger("my_llmkit").setLevel(args.log_level.upper())
+        # logging.getLogger("httpx").setLevel(args.log_level.upper())
 
     # 尝试加载 MCP 服务器配置
     mcp_config_path = gede_mcp_config_path()

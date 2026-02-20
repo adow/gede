@@ -2,11 +2,13 @@
 #
 # OpenAI 兼容实现
 #
+# OpenAI 的 chat 接口是可以通过 reasoning_effort 设置思考等级的，
+# 但是不同的 provider 可能支持方式不一样
+#
 import json
 import logging
 from typing import Any, AsyncIterator, Optional, Type, Union
 
-logger = logging.getLogger(__name__)
 
 from openai import AsyncOpenAI
 from openai.types.chat import ChatCompletionToolUnionParam
@@ -27,6 +29,9 @@ from .types import (
     UnifiedToolCall,
     UnifiedUsage,
 )
+
+
+logger = logging.getLogger(__name__)
 
 
 class OpenAICompatibleChatCompletion(LLMChatCompletion):
@@ -174,6 +179,10 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
             mcp_servers=mcp_servers,
             response_format=response_format,
             stream=True,
+        )
+        logger.debug(
+            "OpenAI Request: %s\n",
+            json.dumps(kwargs, indent=2, ensure_ascii=False),
         )
 
         response = await self.client.chat.completions.create(**kwargs)
@@ -471,6 +480,11 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
             mcp_servers=mcp_servers,
             response_format=response_format,
             stream=False,
+        )
+
+        logger.debug(
+            "OpenAI Request: %s\n",
+            json.dumps(kwargs, indent=2, ensure_ascii=False),
         )
 
         response = await self.client.chat.completions.create(**kwargs)
