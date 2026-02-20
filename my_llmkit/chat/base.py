@@ -99,7 +99,7 @@ class LLMChatCompletion(ABC):
         tool_executor = ToolExecutor(tools, mcp_servers)
 
         while current_round < max_rounds:
-            logger.info("========== Round: %s =========", current_round)
+            logger.debug("========== Round: %s =========", current_round)
             current_round += 1
 
             # 调用模型（非流式）

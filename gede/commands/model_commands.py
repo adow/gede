@@ -134,6 +134,7 @@ class ManageProviderModelsCommand(CommandBase):
             model_name = model.model_name or model_id
             model_name_dict[model_id] = model_name
             choices.append((model_name, model_id))
+        choices.sort(key=lambda item: item[0].casefold())
 
         answers = inquirer.prompt(
             [

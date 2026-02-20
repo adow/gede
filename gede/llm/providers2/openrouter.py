@@ -47,7 +47,6 @@ class OpenRouterProvider(LLMProviderBase):
     def default_models(self) -> Optional[list[str]]:
         return [
             "openai/gpt-5.2",
-            "anthropic/claude-sonnet-4.5",
             "x-ai/grok-4-fast",
             "google/gemini-3-pro-preview",
         ]
