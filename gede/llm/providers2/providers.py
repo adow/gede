@@ -14,6 +14,7 @@ from .base import LLMProviderBase
 from .openrouter import OpenRouterProvider
 from .zenmux import ZenMuxProvider
 from .moonshot import MoonshotProvider
+from .deepseek import DeepSeekProvider
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,7 @@ PROVIDERS: list[LLMProviderBase] = [
     OpenRouterProvider(),
     ZenMuxProvider(),
     MoonshotProvider(),
+    DeepSeekProvider(),
 ]
 
 
