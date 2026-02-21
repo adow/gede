@@ -15,6 +15,10 @@ from .openrouter import OpenRouterProvider
 from .zenmux import ZenMuxProvider
 from .moonshot import MoonshotProvider
 from .deepseek import DeepSeekProvider
+from .baidu import BaiduProvider
+from .alibaba import AlibabaProvider
+from .voice_engine import VoiceEngineProvider
+from .google import GoogleProvider
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +27,10 @@ PROVIDERS: list[LLMProviderBase] = [
     ZenMuxProvider(),
     MoonshotProvider(),
     DeepSeekProvider(),
+    BaiduProvider(),
+    AlibabaProvider(),
+    VoiceEngineProvider(),
+    GoogleProvider(),
 ]
 
 

@@ -1,6 +1,5 @@
 # coding=utf-8
 #
-# deepseek.py
 #
 
 import os
@@ -17,15 +16,17 @@ from .reasoning import ReasoningEffortType
 
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("DEEPSEEK_API_KEY", "")
-API_BASE_URL = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1")
+API_KEY = os.getenv("QWEN_API_KEY", "")
+API_BASE_URL = os.getenv(
+    "QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
+)
 
 
-class DeepSeekProvider(LLMProviderBase):
+class AlibabaProvider(LLMProviderBase):
     def __init__(self):
         super().__init__(
-            provider_id="deepseek",
-            name="DeepSeek",
+            provider_id="alibaba",
+            name="Alibaba",
         )
 
     def get_chat_client(
@@ -40,11 +41,11 @@ class DeepSeekProvider(LLMProviderBase):
 
     @property
     def default_models(self) -> Optional[list[str]]:
-        return ["deepseek-chat", "deepseek-reasoner"]
+        return ["qwen3.5-plus"]
 
     async def load_models(self):
         if not API_KEY:
-            logger.warning("DeepSeek API key is not set, skipping model loading.")
+            logger.warning("Alibaba API key is not set, skipping model loading.")
             return
 
         try:
@@ -54,17 +55,44 @@ class DeepSeekProvider(LLMProviderBase):
                 model_id = (one.id or "").lower()
                 if not model_id:
                     continue
+                if not (model_id.startswith("qwen") or model_id.startswith("qwq")):
+                    continue
                 model_path = f"{self.provider_id}:{model_id}"
                 model_info = await get_model_info(model_path)
                 if not model_info:
-                    logger.warning(f"DeepSeek model info not found: {model_path}")
+                    logger.warning(f"Alibaba model info not found: {model_path}")
                     continue
                 self.models.append(model_info)
-            logger.debug(f"DeepSeek models loaded: {len(self.models)}")
+            logger.debug(f"Alibaba models loaded: {len(self.models)}")
         except Exception as e:
-            logger.error(f"DeepSeek load models error: {e}")
+            logger.error(f"Alibaba load models error: {e}")
 
     def make_reasoning_setting(
         self, model_id: str, reasoning_effort: ReasoningEffortType
     ) -> ModelSettings:
-        return ModelSettings()
+        settings = ModelSettings()
+        if not model_id.startswith("qwen3"):
+            return settings
+
+        if reasoning_effort in [None, "auto"]:
+            return settings
+
+        if reasoning_effort == "off":
+            settings.extra_body = {"enable_thinking": False}
+            return settings
+
+        budget_tokens = 2000
+        if reasoning_effort == "minimal":
+            budget_tokens = 1000
+        elif reasoning_effort == "low":
+            budget_tokens = 2000
+        elif reasoning_effort == "medium":
+            budget_tokens = 5000
+        elif reasoning_effort == "high":
+            budget_tokens = 10000
+
+        settings.extra_body = {
+            "enable_thinking": True,
+            "thinking_budget": budget_tokens,
+        }
+        return settings

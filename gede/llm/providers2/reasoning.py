@@ -70,11 +70,17 @@ def make_claude_reasoning(
 def make_gemini_reasnoing(
     model_settings: ModelSettings, reasoning_effort: ReasoningEffortType = "auto"
 ):
-    extra_body: Any = model_settings.extra_body or {}
+    # extra_body: Any = model_settings.extra_body or {}
+    # if reasoning_effort in ["auto", "off"]:
+    #     if "google" in extra_body:
+    #         del extra_body["google"]
+    # else:
+    #     extra_body["google"] = {"thinking_config": {"include_thoughts": True}}
+    # model_settings.extra_body = extra_body
+    # return model_settings
     if reasoning_effort in ["auto", "off"]:
-        if "google" in extra_body:
-            del extra_body["google"]
+        model_settings.reasoning = None
     else:
-        extra_body["google"] = {"thinking_config": {"include_thoughts": True}}
-    model_settings.extra_body = extra_body
+        effort = cast(ReasoningEffort, reasoning_effort)
+        model_settings.reasoning = Reasoning(effort=effort)
     return model_settings

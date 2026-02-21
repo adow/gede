@@ -41,6 +41,10 @@ OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
 OPENAI_API_KEY=""
 OPENAI_BASE_URL="https://api.openai.com/v1"
 
+# google gemini (OpenAI compatible)
+GOOGLE_API_KEY=""
+GOOGLE_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
+
 # v2 version
 WENXIN_API_KEY=''
 WENXIN_BASE_URL='https://qianfan.baidubce.com/v2'
