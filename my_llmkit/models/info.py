@@ -156,7 +156,10 @@ def _cache_file():
 
 async def update_modep_info_from_litellm():
     global MODEL_INFO_DICT_CACHE
-    url = "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json"
+    url = os.getenv(
+        "LITELLM_MODELS_URL",
+        "https://raw.githubusercontent.com/BerriAI/litellm/main/model_prices_and_context_window.json",
+    )
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
@@ -233,7 +236,7 @@ async def update_modep_info_from_litellm():
 
 async def update_model_info_from_models_dev():
     global MODEL_INFO_DICT_CACHE
-    url = "https://models.dev/api.json"
+    url = os.getenv("MODELS_DEV_MODELS_URL", "https://models.dev/api.json")
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
@@ -276,8 +279,12 @@ async def update_model_info_from_models_dev():
         MODEL_INFO_DICT_CACHE.update(models_cache)
 
 
-async def update_model_info_from_myllmkit(url: str):
+async def update_model_info_from_myllmkit():
     global MODEL_INFO_DICT_CACHE
+    url = os.getenv(
+        "MODELS_MY_LLMKIT",
+        "https://gist.githubusercontent.com/adow/b80879e7a997c42da9c6b5b9cfdd680c/raw/55b5a315e7cfd485c028aa668f159980e94e2a97/my-llmkit-models.json",
+    )
     async with httpx.AsyncClient() as client:
         response = await client.get(url)
         if response.status_code != 200:
@@ -288,17 +295,16 @@ async def update_model_info_from_myllmkit(url: str):
             logger.error("No data found in model info list.")
             return None
 
-        models_cache: dict[str, ModelInfo] = ModelInfoDictType.validate_json(rows)
+        models_cache: dict[str, ModelInfo] = ModelInfoDictType.validate_python(rows)
         if models_cache:
             MODEL_INFO_DICT_CACHE.update(models_cache)
 
 
-async def update_model_info_cache(custom_url: Optional[str] = None):
+async def update_model_info_cache():
     global MODEL_INFO_DICT_CACHE
     await update_modep_info_from_litellm()
     await update_model_info_from_models_dev()
-    if custom_url:
-        await update_model_info_from_myllmkit(custom_url)
+    await update_model_info_from_myllmkit()
     output = ModelInfoDictType.dump_python(MODEL_INFO_DICT_CACHE)
     with open(_cache_file(), "w") as f:
         f.write(json.dumps(output, indent=2, ensure_ascii=False))
