@@ -16,8 +16,8 @@ from .reasoning import ReasoningEffortType
 
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("WENXIN_API_KEY", "")
-API_BASE_URL = os.getenv("WENXIN_BASE_URL", "https://qianfan.baidubce.com/v2")
+API_KEY = os.getenv("QIANFAN_API_KEY", "")
+API_BASE_URL = os.getenv("QIANFAN_BASE_URL", "https://qianfan.baidubce.com/v2")
 
 
 class BaiduProvider(LLMProviderBase):

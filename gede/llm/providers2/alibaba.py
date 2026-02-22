@@ -16,17 +16,17 @@ from .reasoning import ReasoningEffortType
 
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("QWEN_API_KEY", "")
+API_KEY = os.getenv("DASHSCOPE_API_KEY", "")
 API_BASE_URL = os.getenv(
-    "QWEN_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    "DASHSCOPE_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
 )
 
 
 class AlibabaProvider(LLMProviderBase):
     def __init__(self):
         super().__init__(
-            provider_id="alibaba",
-            name="Alibaba",
+            provider_id="alibaba-cn",
+            name="Alibaba(China)",
         )
 
     def get_chat_client(

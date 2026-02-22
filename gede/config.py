@@ -42,16 +42,28 @@ OPENAI_API_KEY=""
 OPENAI_BASE_URL="https://api.openai.com/v1"
 
 # google gemini (OpenAI compatible)
-GOOGLE_API_KEY=""
-GOOGLE_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
+GEMINI_API_KEY=""
+GEMINI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
 
-# v2 version
-WENXIN_API_KEY=''
-WENXIN_BASE_URL='https://qianfan.baidubce.com/v2'
+# baidu 
+QIANFAN_API_KEY=''
+QIANFAN_BASE_URL='https://qianfan.baidubce.com/v2'
 
 # SiliconFlow
 SILICONFLOW_API_KEY=""
 SILICONFLOW_BASE_URL="https://api.siliconflow.cn/v1"
+
+# aliyun qwen
+DASHSCOPE_API_KEY=""
+DASHSCOPE_API_BASE="https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+# doubao
+ARK_API_KEY=""
+ARK_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
+
+# deepseek
+DEEPSEEK_API_KEY=""
+DEEPSEEK_BASE_URL="https://api.deepseek.com/v1"
 
 # jina
 JINA_API_KEY=""
@@ -65,31 +77,6 @@ EXAAI_BASE_URL="https://api.exa.ai"
 BOCHA_API_KEY=""
 BOCHA_BASE_URL="https://api.302ai.cn/bochaai/v1"
 
-# aliyun qwen
-QWEN_API_KEY=""
-QWEN_API_BASE="https://dashscope.aliyuncs.com/compatible-mode/v1"
-
-# doubao
-DOUBAO_API_KEY=""
-DOUBAO_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
-DOUBAO_BOT_URL="https://ark.cn-beijing.volces.com/api/v3/bots"
-
-# deepseek
-DEEPSEEK_API_KEY=""
-DEEPSEEK_BASE_URL="https://api.deepseek.com/v1"
-
-# hunyuan
-HY_APPID=""
-HY_SECRETID=""
-HY_SECRETKEY=""
-HY_API_KEY=""
-HY_BASE_URL="https://api.hunyuan.cloud.tencent.com/v1"
-
-# vllm
-VLLM_API_KEY=""
-# qwen3-8b
-VLLM_QWEN3_BASE_URL=""
-VLLM_QWEN3_MODEL="Qwen/Qwen3-8B"
 
 # generate title
 GENERATE_TITLE_MODEL=""

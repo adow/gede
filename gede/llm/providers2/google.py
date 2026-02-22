@@ -16,9 +16,9 @@ from .reasoning import ReasoningEffortType, make_gemini_reasnoing
 
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("GOOGLE_API_KEY", "")
+API_KEY = os.getenv("GEMINI_API_KEY", "")
 API_BASE_URL = os.getenv(
-    "GOOGLE_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/"
+    "GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai/"
 )
 
 

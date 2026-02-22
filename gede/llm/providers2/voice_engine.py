@@ -17,8 +17,8 @@ from .reasoning import ReasoningEffortType
 
 logger = logging.getLogger(__name__)
 
-API_KEY = os.getenv("DOUBAO_API_KEY", "")
-API_BASE_URL = os.getenv("DOUBAO_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
+API_KEY = os.getenv("ARK_API_KEY", "")
+API_BASE_URL = os.getenv("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
 
 
 class VoiceEngineProvider(LLMProviderBase):
