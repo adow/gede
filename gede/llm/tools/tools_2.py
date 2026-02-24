@@ -10,8 +10,17 @@ from .read_url_tool2 import read_url
 # 所有内置可用工具
 AVAILABLE_INNER_TOOLS = ToolFunctions(now, web_search, read_url)
 
+AVAILABLE_INNER_TOOL_NAMES = [
+    one.name for one in AVAILABLE_INNER_TOOLS.tool_function_list
+]
+
+AVAILABLE_INNER_TOOL_DESC = {
+    one.name: one.tool_param.description.splitlines()[0]
+    for one in AVAILABLE_INNER_TOOLS.tool_function_list
+}
+
 AVAILABLE_INNER_TOOLS_SELECTOR = [
-    (one.name + ":" + one.tool_param.description.splitlines()[0], one.name)
+    (one.name + ":" + AVAILABLE_INNER_TOOL_DESC[one.name], one.name)
     for one in AVAILABLE_INNER_TOOLS.tool_function_list
 ]
 

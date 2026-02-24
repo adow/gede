@@ -5,12 +5,13 @@
 #
 
 import logging
+import shutil
 from typing import Optional, List, Any
 
 import inquirer
 
 from .base import CommandBase
-from ..llm.tools.tools_2 import AVAILABLE_INNER_TOOLS_SELECTOR
+from ..llm.tools.tools_2 import AVAILABLE_INNER_TOOL_NAMES, AVAILABLE_INNER_TOOL_DESC
 
 logger = logging.getLogger(__name__)
 
@@ -19,12 +20,21 @@ class SelectToolsCommand(CommandBase):
     async def do_command_async(self) -> bool:
         command = "/select-tools"
         if self.message == command:
+            term_width = shutil.get_terminal_size(fallback=(80, 24)).columns
+            hint_width = max(24, term_width - 8)
+            tool_hints = {
+                name: (
+                    desc if len(desc) <= hint_width else (desc[: hint_width - 3] + "...")
+                )
+                for name, desc in AVAILABLE_INNER_TOOL_DESC.items()
+            }
             question = [
                 inquirer.Checkbox(
                     "tools",
-                    message="Select tools to enable (use SPACE to select/deselect, ENTER to confirm)",
-                    choices=AVAILABLE_INNER_TOOLS_SELECTOR,
+                    message="Select tools (SPACE toggle, ENTER confirm)",
+                    choices=AVAILABLE_INNER_TOOL_NAMES,
                     default=self.context.tools,
+                    hints=tool_hints,
                 )
             ]
 
@@ -34,6 +44,11 @@ class SelectToolsCommand(CommandBase):
                 self.context.console.print(
                     f"Select {len(selected_tools)} tools", style="info"
                 )
+                for tool_name in selected_tools:
+                    tool_desc = AVAILABLE_INNER_TOOL_DESC.get(tool_name, "")
+                    self.context.console.print(
+                        f"- {tool_name}: {tool_desc}", style="info"
+                    )
 
                 # Extract tool objects
                 self.context.tools = selected_tools
