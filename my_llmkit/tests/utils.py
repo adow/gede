@@ -24,7 +24,12 @@ async def run_stream(runner: ChatCompletionStreamRunner):
     tool_calls = []
     usages: list[Usage] = []
 
+    last_event_type: str = ""
+
     async for event in runner.stream_event():
+        if last_event_type != event.type:
+            print(f"\n[{event.type.upper()}]", flush=True)
+        last_event_type = event.type
         if event.type == "content":
             print(event.content, end="", flush=True)
             content_buffer += event.content
@@ -32,16 +37,14 @@ async def run_stream(runner: ChatCompletionStreamRunner):
             print(event.content, end="", flush=True)
             reasoning_content_buffer += event.content
         elif event.type == "tool_call_start":
-            print(f"\n[Tool Call Start] {event.function_name}\n")
+            print(f"{event.function_name}\n")
         elif event.type == "tool_call_result":
-            print(
-                f"\n[Tool Call Result] {event.function_name}: {event.function_result}\n"
-            )
+            print(f"{event.function_name}: {event.function_result}\n")
             tool_calls.append(
                 {"name": event.function_name, "result": event.function_result}
             )
         elif event.type == "usage":
-            print(f"\n[Usage] {event.usage.model_dump_json()}\n")
+            print(f"{event.usage.model_dump_json()}\n")
             usages.append(event.usage)
 
     logging.info("full reasoning: %s", reasoning_content_buffer)

@@ -131,31 +131,26 @@ gemini_3_pro_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "google/gemini-3-pro-preview",
-    Reasoning(effort="medium"),
 )
 gemini_3_pro_zenmux = (
     api_key_zenmux,
     api_base_zenmux_openai,
     "google/gemini-3-pro-preview",
-    Reasoning(effort="medium"),
 )
 gemini_3_flash_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "google/gemini-3-flash-preview",
-    Reasoning(effort="medium"),
 )
 gemini_3_flash_zenmux = (
     api_key_zenmux,
     api_base_zenmux_openai,
     "google/gemini-3-flash-preview",
-    Reasoning(effort="medium"),
 )
 gemini_3_flash_google = (
     api_key_google,
     api_base_google,
     "gemini-3-flash-preview",
-    Reasoning(effort="medium"),
 )
 
 
@@ -163,95 +158,81 @@ claude_4_5_sonnet_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "anthropic/claude-sonnet-4.5",
-    False,
 )
 claude_4_5_sonnet_zenmux = (
     api_key_zenmux,
-    # api_base_zenmux,
-    "https://zenmux.ai/api/anthropic",
-    "anthropic/claude-sonnet-4.5",
-    True,
+    api_base_zenmux_anthropic,
 )
 claude_4_5_haiku_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "anthropic/claude-haiku-4.5",
-    False,
 )
 claude_4_5_haiku_zenmux = (
     api_key_zenmux,
-    # api_base_zenmux,
-    "https://zenmux.ai/api/anthropic",
+    api_base_zenmux_anthropic,
     "anthropic/claude-haiku-4.5",
-    True,
 )
 claude_4_5_haiku_302ai = (
     api_key_302ai,
     api_base_302ai,
     "claude-haiku-4-5-20251001",
-    False,
 )
 kimi_k2_thinking_moonshot = (
     api_key_moonshot,
     api_base_moonshot,
     "kimi-k2-thinking",
-    None,
 )
 kimi_k2_thinking_turbo_moonshot = (
     api_key_moonshot,
     api_base_moonshot,
     "kimi-k2-thinking-turbo",
-    None,
 )
-kimi_k2_moonshot = (api_key_moonshot, api_base_moonshot, "kimi-k2-0905-preview", None)
+kimi_k2_moonshot = (api_key_moonshot, api_base_moonshot, "kimi-k2-0905-preview")
 kimi_k2_turbo_moonshot = (
     api_key_moonshot,
     api_base_moonshot,
     "kimi-k2-turbo-preview",
     None,
 )
-deepseek_chat_deepseek = (api_key_deepseek, api_base_deepseek, "deepseek-chat", None)
+kimi_k2_5_moonshot = (api_key_moonshot, api_base_moonshot, "kimi-k2.5")
+deepseek_chat_deepseek = (api_key_deepseek, api_base_deepseek, "deepseek-chat")
 deepseek_reasoner_deepseek = (
     api_key_deepseek,
     api_base_deepseek,
     "deepseek-reasoner",
-    None,
 )
 grok_4_1_fast_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "x-ai/grok-4.1-fast",
-    None,
 )
 grok_4_fast_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "x-ai/grok-4-fast",
-    None,
 )
-grok_4_openrouter = (api_key_openrouter, api_base_openrouter, "x-ai/grok-4", None)
+grok_4_openrouter = (api_key_openrouter, api_base_openrouter, "x-ai/grok-4")
 grok_code_fast_1_openrouter = (
     api_key_openrouter,
     api_base_openrouter,
     "x-ai/grok-code-fast-1",
-    None,
 )
 grok_4_1_fast_zenmux = (
     api_key_zenmux,
     api_base_zenmux_openai,
     "x-ai/grok-4.1-fast",
-    None,
 )
-grok_4_fast_zenmux = (api_key_zenmux, api_base_zenmux_openai, "x-ai/grok-4-fast", None)
-grok_4_zenmux = (api_key_zenmux, api_base_zenmux_openai, "x-ai/grok-4", None)
+grok_4_fast_zenmux = (api_key_zenmux, api_base_zenmux_openai, "x-ai/grok-4-fast")
+grok_4_zenmux = (api_key_zenmux, api_base_zenmux_openai, "x-ai/grok-4")
 grok_code_fast_1_zenmux = (
     api_key_zenmux,
     api_base_zenmux_openai,
     "x-ai/grok-code-fast-1",
-    None,
 )
-doubao_seed_1_8 = (api_key_doubao, api_base_doubao, "doubao-seed-1-8-251228", None)
-doubao_seed_1_6 = (api_key_doubao, api_base_doubao, "doubao-seed-1-6-251015", None)
-ernie_x_1_1 = (api_key_wenxin, api_base_wenxin, "ernie-x1.1-preview", None)
-ernie_5_thinking = (api_key_wenxin, api_base_wenxin, "ernie-5.0-thinking-latest", None)
+doubao_seed_1_8 = (api_key_doubao, api_base_doubao, "doubao-seed-1-8-251228")
+doubao_seed_1_6 = (api_key_doubao, api_base_doubao, "doubao-seed-1-6-251015")
+doubao_seed_2_pro = (api_key_doubao, api_base_doubao, "doubao-seed-2-0-pro-260215")
+ernie_x_1_1 = (api_key_wenxin, api_base_wenxin, "ernie-x1.1-preview")
+ernie_5_thinking = (api_key_wenxin, api_base_wenxin, "ernie-5.0-thinking-latest")
 qwen_plus = ("qwen-plus", True)
