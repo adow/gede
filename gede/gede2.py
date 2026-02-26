@@ -13,7 +13,6 @@ from typing import Optional
 
 from prompt_toolkit.shortcuts import CompleteStyle
 from rich import print
-from rich.panel import Panel
 from prompt_toolkit import prompt, PromptSession
 from prompt_toolkit.history import FileHistory, History, InMemoryHistory
 from prompt_toolkit.completion import WordCompleter

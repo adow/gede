@@ -38,6 +38,11 @@ AI302_BASE_URL="https://api.302ai.cn/v1"
 OPENROUTER_API_KEY=""
 OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
 
+# zenmux
+ZENMUX_API_KEY=""
+ZENMUX_BASE_URL_OPENAI="https://zenmux.ai/api/v1"
+ZENMUX_BASE_URL_ANTHROPIC="https://zenmux.ai/api/anthropic"
+
 OPENAI_API_KEY=""
 OPENAI_BASE_URL="https://api.openai.com/v1"
 
