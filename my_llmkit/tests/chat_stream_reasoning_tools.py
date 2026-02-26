@@ -113,3 +113,27 @@ async def test_deepseek_reasoner_deepseek():
 async def test_doubao_seed_2_pro():
     client = make_openai_client(*doubao_seed_2_pro)
     await run_tool_test(client)
+
+
+@pytest.mark.asyncio
+async def test_ernie_x_1_1():
+    client = make_openai_client(*ernie_x_1_1)
+    await run_tool_test(client)
+
+
+@pytest.mark.asyncio
+async def test_grok_4_1_fast_openrouter():
+    client = make_openai_client(*grok_4_1_fast_openrouter)
+    await run_tool_test(client)
+
+
+@pytest.mark.asyncio
+async def test_qwen_plus():
+    client = make_qwen_client("qwen-plus", reasoning=True)
+    await run_tool_test(client)
+
+
+@pytest.mark.asyncio
+async def test_claude_4_5_sonnet_zenmux():
+    client = make_claude_client(*claude_4_5_sonnet_zenmux, reasoning=True)
+    await run_tool_test(client)

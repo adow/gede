@@ -162,6 +162,7 @@ claude_4_5_sonnet_openrouter = (
 claude_4_5_sonnet_zenmux = (
     api_key_zenmux,
     api_base_zenmux_anthropic,
+    "anthropic/claude-sonnet-4.5",
 )
 claude_4_5_haiku_openrouter = (
     api_key_openrouter,
