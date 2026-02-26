@@ -8,6 +8,9 @@ from my_llmkit.chat import (
 )
 
 
+logger = logging.getLogger(__name__)
+
+
 class RunStreamResult(BaseModel):
     content: str
     reasoning: Optional[str] = None

@@ -19,7 +19,8 @@ from my_llmkit.chat import (
     UnifiedChunk,
     UnifiedMessage,
 )
-from .tools import now_tool, get_weather_tool
+
+logger = logging.getLogger(__name__)
 
 
 def load_env_file():
