@@ -5,11 +5,6 @@ from openai.types import Reasoning
 from typing import Optional, Any
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from openai.types.chat import (
-    ChatCompletionMessageParam,
-    ChatCompletionToolParam,
-)
-from pydantic import BaseModel
 
 from my_llmkit.chat.model_settings import ModelSettings
 from my_llmkit.chat import (
