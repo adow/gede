@@ -3,7 +3,6 @@ import logging
 from pathlib import Path
 from openai.types import Reasoning
 from typing import Optional, Any
-from datetime import datetime, timezone
 from dotenv import load_dotenv
 
 from my_llmkit.chat.model_settings import ModelSettings

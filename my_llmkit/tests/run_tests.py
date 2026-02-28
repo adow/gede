@@ -9,49 +9,31 @@ from openai import OpenAI
 from openai.types import Reasoning
 from pydantic import BaseModel
 from typing import Any
-import pytest
-from my_llmkit.chat import UnifiedMessage, ToolFunctions
+from my_llmkit.chat import (
+    UnifiedMessage,
+    ToolFunctions,
+    TextContent,
+    DocumentContent,
+    ImageContent,
+)
 from my_llmkit.chat.base import LLMChatCompletion
 from my_llmkit.chat.claude import ClaudeChatCompletion
 from my_llmkit.chat.openai_compatible import OpenAICompatibleChatCompletion
 from my_llmkit.mcp.mcp_config import MCPServersContext
 from .tools import now_tool, get_weather_tool
 from .conftest import (
-    make_claude_client,
-    make_openai_client,
     make_qwen_client,
-    gpt_5_2_openrouter,
-    gpt_5_2_zenmux,
-    gemini_3_pro_openrouter,
-    gemini_3_pro_zenmux,
-    kimi_k2_thinking_moonshot,
-    kimi_k2_thinking_turbo_moonshot,
-    kimi_k2_5_moonshot,
-    deepseek_reasoner_deepseek,
-    doubao_seed_1_6,
-    doubao_seed_2_pro,
-    ernie_x_1_1,
-    grok_4_1_fast_openrouter,
-    grok_4_fast_openrouter,
-    grok_4_openrouter,
-    grok_code_fast_1_openrouter,
-    grok_4_1_fast_zenmux,
-    grok_4_fast_zenmux,
-    grok_4_zenmux,
-    grok_code_fast_1_zenmux,
-    claude_4_5_sonnet_zenmux,
-    claude_4_5_sonnet_openrouter,
-    claude_4_5_haiku_zenmux,
-    claude_4_5_haiku_openrouter,
-    qwen_plus,
 )
 from .utils import RunStreamResult, run_stream
 
 logger = logging.getLogger(__name__)
 
 
-# reasoning stream tools
-async def run_tool_test(client: LLMChatCompletion):
+# reasoning tools
+async def run_stream_tool_test(client: LLMChatCompletion):
+    """
+    流式输出(含思考模式)调用工具
+    """
     # prompt = "现在几点？"
     prompt = "明天天气怎么样"
     messages: list[UnifiedMessage] = [UnifiedMessage(role="user", content=prompt)]
@@ -68,7 +50,30 @@ async def run_tool_test(client: LLMChatCompletion):
     content_buffer = stream_result.content.strip()
     # assert year in content_buffer and month in content_buffer and day in content_buffer
     assert "6°C" in content_buffer
-    pass
+
+
+async def run_tool_test(client: LLMChatCompletion):
+    """
+    非流式输出(含思考模式)调用工具
+    """
+    prompt = "现在几点？"
+    # prompt = "明天天气怎么样"
+    messages: list[UnifiedMessage] = [UnifiedMessage(role="user", content=prompt)]
+    result = await client.run(
+        messages=messages,
+        tools=ToolFunctions(now_tool, get_weather_tool),
+    )
+    print("content", result.last_content)
+    print("usages", result.usages)
+    print("messages", result.messages)
+    now = datetime.now()
+    year = str(now.year)
+    month = str(now.month)
+    day = str(now.day)
+    content = result.last_content or ""
+    content_buffer = content.strip()
+    assert year in content_buffer and month in content_buffer and day in content_buffer
+    # assert "6°C" in content_buffer
 
 
 # stream response format
@@ -201,76 +206,134 @@ async def run_claude_json_schema_test(client: ClaudeChatCompletion):
     check_stream_response_format_result(result.output_result, stream_result.content)
 
 
-# tests
-@pytest.mark.asyncio
-async def test_gpt_5_2_zemux():
-    client = make_openai_client(*gpt_5_2_zenmux, reasoning=Reasoning(effort="medium"))
-    await run_tool_test(client)
+# vision pdf input
 
 
-@pytest.mark.asyncio
-async def test_gpt_5_2_openrouter():
-    client = make_openai_client(
-        *gpt_5_2_openrouter, reasoning=Reasoning(effort="medium")
+async def run_openai_pdf_file_input_test(
+    client: OpenAICompatibleChatCompletion,
+):
+    """测试 OpenAI 的 文件输入"""
+
+    # 使用测试 PDF 文件（需要提前准备一个测试 PDF）
+    # 这里假设您有一个测试 PDF 文件，或者可以创建一个简单的 base64 示例
+    prompt = "这个文档的主要内容是什么？"
+
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(
+            role="user",
+            content=[
+                TextContent(text=prompt),
+                DocumentContent.from_file(
+                    # 从本地文件加载（需要替换为实际路径）
+                    "/Users/reynoldqin/Downloads/planning-with-files.pdf"
+                ),
+            ],
+        )
+    ]
+
+    result = client.run_stream(messages=messages)
+    stream_result = await run_stream(result)
+    content = stream_result.content.strip()
+
+    # 验证返回内容不为空
+    assert len(content) > 0
+    logging.info(f"OpenAI Document Response: {content}")
+
+
+async def run_claude_pdf_url_input_test(
+    client: ClaudeChatCompletion,
+):
+    """测试 Claude 的 URL 文档输入"""
+    prompt = "这个文档的主要内容是什么？请简要总结。"
+
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(
+            role="user",
+            content=[
+                TextContent(text=prompt),
+                # 使用 URL 方式（Claude 支持）
+                DocumentContent.from_url(
+                    "https://tds-us-east-1.slashusr.xyz/planning-with-files.pdf"
+                ),
+            ],
+        )
+    ]
+
+    result = client.run_stream(messages=messages)
+    stream_result = await run_stream(result)
+    content = stream_result.content.strip()
+
+    # 验证返回内容包含文档相关信息
+    assert len(content) > 0
+    logging.info(f"Claude Document (URL) Response: {content}")
+
+
+async def run_cluade_pdf_file_input_test(client: ClaudeChatCompletion):
+    """测试从本地文件加载文档（需要实际的 PDF 文件）"""
+
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(
+            role="user",
+            content=[
+                TextContent(text="总结这个文档的主要内容"),
+                # 从本地文件加载（需要替换为实际路径）
+                DocumentContent.from_file(
+                    "/Users/reynoldqin/Downloads/planning-with-files.pdf"
+                ),
+            ],
+        )
+    ]
+
+    result = client.run_stream(messages=messages)
+    stream_result = await run_stream(result)
+    content = stream_result.content.strip()
+
+    assert len(content) > 0
+    logging.info(f"Document from file Response: {content}")
+
+
+# vision image input
+
+
+async def run_openai_image_input_test(
+    client: OpenAICompatibleChatCompletion,
+):
+    """测试 OpenAI 图片输入"""
+    prompt = "图片里有什么"
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(
+            role="user",
+            content=[
+                TextContent(text=prompt),
+                ImageContent(image_url="https://tds-us-east-1.slashusr.xyz/1.png"),
+                # ImageContent.from_file("/Users/reynoldqin/Downloads/1.png"),
+            ],
+        )
+    ]
+    result = client.run_stream(
+        messages=messages,
     )
-    await run_tool_test(client)
+    stream_result = await run_stream(result)
+    content = stream_result.content.strip()
+    assert "魔法" in content or "奇幻" in content or "场景" in content
 
 
-@pytest.mark.asyncio
-async def test_gemini_3_pro_openrouter():
-    client = make_openai_client(
-        *gemini_3_pro_openrouter, reasoning=Reasoning(effort="medium")
+async def run_claude_image_input_test(client: ClaudeChatCompletion):
+    """测试 Claude 图片输入"""
+    prompt = "图片里有什么"
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(
+            role="user",
+            content=[
+                TextContent(text=prompt),
+                ImageContent(image_url="https://tds-us-east-1.slashusr.xyz/1.png"),
+                # ImageContent.from_file("/Users/reynoldqin/Downloads/1.png"),
+            ],
+        )
+    ]
+    result = client.run_stream(
+        messages=messages,
     )
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_kimi_k2_thinking_moonshot():
-    client = make_openai_client(
-        *kimi_k2_thinking_moonshot, reasoning=Reasoning(effort="medium")
-    )
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_kimi_k2_5_moonshot():
-    client = make_openai_client(
-        *kimi_k2_5_moonshot, reasoning=Reasoning(effort="medium")
-    )
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_deepseek_reasoner_deepseek():
-    client = make_openai_client(*deepseek_reasoner_deepseek)
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_doubao_seed_2_pro():
-    client = make_openai_client(*doubao_seed_2_pro)
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_ernie_x_1_1():
-    client = make_openai_client(*ernie_x_1_1)
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_grok_4_1_fast_openrouter():
-    client = make_openai_client(*grok_4_1_fast_openrouter)
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_qwen_plus():
-    client = make_qwen_client("qwen-plus", reasoning=True)
-    await run_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_claude_4_5_sonnet_zenmux():
-    client = make_claude_client(*claude_4_5_sonnet_zenmux, reasoning=True)
-    await run_tool_test(client)
+    stream_result = await run_stream(result)
+    content = stream_result.content.strip()
+    assert "魔法" in content or "奇幻" in content or "场景" in content
