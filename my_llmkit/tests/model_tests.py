@@ -54,9 +54,13 @@ logger = logging.getLogger(__name__)
 
 # tests
 @pytest.mark.asyncio
-async def test_gpt_5_2_zemux():
+async def test_gpt_5_2_zenmux():
     client = make_openai_client(*gpt_5_2_zenmux, reasoning=Reasoning(effort="medium"))
+    await run_tool_test(client)
     await run_stream_tool_test(client)
+    await run_openai_json_schema_test(client)
+    await run_openai_image_input_test(client)
+    await run_openai_pdf_file_input_test(client)
 
 
 @pytest.mark.asyncio

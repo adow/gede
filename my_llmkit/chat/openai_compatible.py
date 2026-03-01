@@ -45,7 +45,9 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
         model_settings: Optional[ModelSettings] = None,
     ):
         super().__init__(api_key, api_base, model, model_settings)
-        self.client = AsyncOpenAI(api_key=self.api_key, base_url=self.api_base)
+        self.client = AsyncOpenAI(
+            api_key=self.api_key, base_url=self.api_base, timeout=300
+        )
 
     def _convert_messages(self, messages: list[UnifiedMessage]) -> list[dict[str, Any]]:
         """将统一消息格式转换为 OpenAI 格式"""

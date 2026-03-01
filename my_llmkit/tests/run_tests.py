@@ -5,7 +5,6 @@
 import os
 import logging
 from datetime import datetime
-from openai import OpenAI
 from openai.types import Reasoning
 from pydantic import BaseModel
 from typing import Any
