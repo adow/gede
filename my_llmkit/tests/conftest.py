@@ -15,9 +15,6 @@ from my_llmkit.chat.model_settings import ModelSettings
 from my_llmkit.chat import (
     OpenAICompatibleChatCompletion,
     ClaudeChatCompletion,
-    ToolFunctions,
-    UnifiedChunk,
-    UnifiedMessage,
 )
 
 logger = logging.getLogger(__name__)

@@ -19,6 +19,7 @@ from .conftest import (
     kimi_k2_5_moonshot,
     deepseek_reasoner_deepseek,
     doubao_seed_1_6,
+    doubao_seed_1_8,
     doubao_seed_2_pro,
     ernie_x_1_1,
     grok_4_1_fast_openrouter,
@@ -104,33 +105,58 @@ async def test_deepseek_reasoner():
     client = make_openai_client(*deepseek_reasoner_deepseek)
     await run_tool_test(client)
     await run_stream_tool_test(client)
+    await run_openai_json_mode_test(client)
+    # deepseek 不支持图像输入
 
 
 @pytest.mark.asyncio
 async def test_doubao_seed_2_pro():
     client = make_openai_client(*doubao_seed_2_pro)
+    await run_tool_test(client)
     await run_stream_tool_test(client)
+    await run_openai_image_input_url_test(client)
+    # doubao-seed-2-pro 不支持结构化输出
+
+
+@pytest.mark.asyncio
+async def test_doubao_seed_1_8():
+    client = make_openai_client(*doubao_seed_1_8)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_openai_image_input_url_test(client)
+    await run_openai_json_schema_test(client)
 
 
 @pytest.mark.asyncio
 async def test_ernie_x_1_1():
     client = make_openai_client(*ernie_x_1_1)
+    await run_tool_test(client)
     await run_stream_tool_test(client)
+    # ernie-x1.1 不支持图像输入和结构化输出
 
 
 @pytest.mark.asyncio
-async def test_grok_4_1_fast_openrouter():
+async def test_grok_4_1_fast():
     client = make_openai_client(*grok_4_1_fast_openrouter)
+    await run_tool_test(client)
     await run_stream_tool_test(client)
+    await run_openai_json_schema_test(client)
+    await run_openai_image_input_url_test(client)
 
 
 @pytest.mark.asyncio
 async def test_qwen_plus():
     client = make_qwen_client("qwen-plus", reasoning=True)
+    await run_tool_test(client)
     await run_stream_tool_test(client)
+    await run_qwen_json_mode_test(client)
+    # qwen-plus 不支持图像输入
 
 
 @pytest.mark.asyncio
 async def test_claude_4_5_sonnet_zenmux():
     client = make_claude_client(*claude_4_5_sonnet_zenmux, reasoning=True)
+    await run_tool_test(client)
     await run_stream_tool_test(client)
+    await run_claude_json_schema_test(client)
+    await run_claude_image_input_test(client)

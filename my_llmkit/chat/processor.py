@@ -7,7 +7,6 @@ import logging
 from dataclasses import asdict
 from typing import Any, AsyncIterator, Optional
 
-logger = logging.getLogger(__name__)
 
 from ..mcp.mcp_client import MCPServerType
 from .events import (
@@ -20,6 +19,9 @@ from .events import (
 )
 from .tools import ToolExecutor, ToolFunctions
 from .types import UnifiedChunk, UnifiedMessage, UnifiedToolCall
+
+
+logger = logging.getLogger(__name__)
 
 
 class ChatCompletionStreamProcessor:

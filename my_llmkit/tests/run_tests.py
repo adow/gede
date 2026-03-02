@@ -83,7 +83,9 @@ class TimeResult(BaseModel):
     weekday: str
 
 
-def check_stream_response_format_result(output_result: Any, content: str):
+def check_stream_response_format_result(
+    output_result: BaseModel | dict[str, Any] | None, content: str
+):
     now = datetime.now()
     year = str(now.year)
     month = str(now.month)
@@ -91,13 +93,20 @@ def check_stream_response_format_result(output_result: Any, content: str):
     content_buffer = content.strip()
     assert year in content_buffer and month in content_buffer and day in content_buffer
     output: Any = output_result
-    logging.info("Output Result: %s", output)
+    logging.info("Output Result: %s, %s", output, type(output))
     assert output is not None
-    assert (
-        year in output.local_time
-        and month in output.local_time
-        and day in output.local_time
-    )
+    if isinstance(output_result, dict):
+        assert (
+            year in output.get("local_time", "")
+            and month in output.get("local_time", "")
+            and day in output.get("local_time", "")
+        )
+    elif isinstance(output_result, BaseModel):
+        assert (
+            year in output.local_time
+            and month in output.local_time
+            and day in output.local_time
+        )
 
 
 async def run_openai_json_schema_test(client: OpenAICompatibleChatCompletion):
@@ -152,11 +161,10 @@ async def run_openai_json_mode_test(client: OpenAICompatibleChatCompletion):
     check_stream_response_format_result(result.output_result, stream_result.content)
 
 
-async def run_qwen_json_mode_test(model: str):
+async def run_qwen_json_mode_test(client: OpenAICompatibleChatCompletion):
     """
     千问在 JSON 模式下的输出格式测试，不会调用工具
     """
-    client = make_qwen_client(model, reasoning=False)
     prompt = """现在几点？
 请使用以下 JSON 格式来回答：
 

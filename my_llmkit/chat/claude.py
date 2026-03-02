@@ -36,6 +36,19 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
+def _safe_json_dumps(payload: Any) -> str:
+    """用于 debug 日志的安全 JSON 序列化，避免类型对象等不可序列化值导致报错。"""
+
+    def _default(value: Any) -> Any:
+        if isinstance(value, type):
+            return value.__name__
+        if hasattr(value, "model_dump"):
+            return value.model_dump()
+        return repr(value)
+
+    return json.dumps(payload, indent=2, ensure_ascii=False, default=_default)
+
+
 class ClaudeChatCompletion(LLMChatCompletion):
     """Anthropic Claude 实现"""
 
@@ -48,7 +61,9 @@ class ClaudeChatCompletion(LLMChatCompletion):
     ):
         super().__init__(api_key, api_base, model, model_settings)
         self.client = anthropic.AsyncAnthropic(
-            api_key=self.api_key, base_url=self.api_base if self.api_base else None
+            api_key=self.api_key,
+            base_url=self.api_base if self.api_base else None,
+            timeout=15 * 60,
         )
 
     def _convert_tools(self, tools: Optional[ToolFunctions]) -> list[dict[str, Any]]:
@@ -200,7 +215,7 @@ class ClaudeChatCompletion(LLMChatCompletion):
 
         logger.debug(
             "Claude Input Messages: \n%s",
-            json.dumps(anthropic_messages, indent=2, ensure_ascii=False),
+            _safe_json_dumps(anthropic_messages),
         )
 
         # Prepare parameters
@@ -215,7 +230,7 @@ class ClaudeChatCompletion(LLMChatCompletion):
 
         logger.debug(
             "Full Tools for Claude: %s\n",
-            json.dumps(full_tools, indent=2, ensure_ascii=False),
+            _safe_json_dumps(full_tools),
         )
         if full_tools:
             kwargs["tools"] = full_tools
@@ -310,19 +325,19 @@ class ClaudeChatCompletion(LLMChatCompletion):
             betas = kwargs.pop("betas")
             logger.debug(
                 "Claude Request: %s\n",
-                json.dumps(kwargs, indent=2, ensure_ascii=False),
+                _safe_json_dumps(kwargs),
             )
             response = await self.client.beta.messages.create(**kwargs, betas=betas)
         else:
             logger.debug(
                 "Claude request: %s\n",
-                json.dumps(kwargs, indent=2, ensure_ascii=False),
+                _safe_json_dumps(kwargs),
             )
             response = await self.client.messages.create(**kwargs)
 
         logger.debug(
             "Claude Response: %s\n",
-            json.dumps(response.model_dump(), indent=2, ensure_ascii=False),
+            _safe_json_dumps(response.model_dump()),
         )
 
         return self._convert_response(response)
@@ -343,7 +358,7 @@ class ClaudeChatCompletion(LLMChatCompletion):
         )
         logger.debug(
             "Claude request: %s\n",
-            json.dumps(kwargs, indent=2, ensure_ascii=False),
+            _safe_json_dumps(kwargs),
         )
 
         async def _generate():

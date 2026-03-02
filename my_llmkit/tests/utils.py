@@ -3,7 +3,6 @@
 # utils.py
 #
 
-
 import logging
 from pydantic import BaseModel
 from typing import Optional, Any
