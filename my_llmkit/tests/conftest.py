@@ -74,6 +74,7 @@ def make_openai_client(
         api_base=api_base,
         model=model,
         model_settings=model_settings,
+        timeout=5 * 60,
     )
     return client
 
@@ -108,6 +109,7 @@ def make_qwen_client(model: str, reasoning: Optional[bool] = None):
         api_base=api_base_qwen,
         model=model,
         model_settings=model_settings,
+        timeout=5 * 60,
     )
     return client
 

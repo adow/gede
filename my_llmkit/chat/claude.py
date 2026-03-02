@@ -242,8 +242,14 @@ class ClaudeChatCompletion(LLMChatCompletion):
             ):
                 # 对于 API，直接传入 Pydantic 模型类型
                 # SDK 会自动调用 transform_schema
-                kwargs["output_format"] = response_format
-                kwargs["betas"] = ["structured-outputs-2025-11-13"]
+                # kwargs["output_format"] = response_format
+                # kwargs["betas"] = ["structured-outputs-2025-11-13"]
+                kwargs["output_config"] = {
+                    "format": {
+                        "type": "json_schema",
+                        "schema": anthropic.transform_schema(response_format),
+                    }
+                }
             else:
                 logger.error(
                     "Anthropic Claude only supports Pydantic BaseModel as response_format."
