@@ -92,6 +92,7 @@ def make_claude_client(
         api_base=api_base,
         model=model,
         model_settings=model_settings,
+        timeout=15 * 60,
     )
     return client
 

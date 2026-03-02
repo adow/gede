@@ -58,12 +58,13 @@ class ClaudeChatCompletion(LLMChatCompletion):
         api_base: str,
         model: str,
         model_settings: Optional[ModelSettings] = None,
+        timeout: Optional[float] = None,
     ):
-        super().__init__(api_key, api_base, model, model_settings)
+        super().__init__(api_key, api_base, model, model_settings, timeout)
         self.client = anthropic.AsyncAnthropic(
             api_key=self.api_key,
             base_url=self.api_base if self.api_base else None,
-            timeout=15 * 60,
+            timeout=timeout,
         )
 
     def _convert_tools(self, tools: Optional[ToolFunctions]) -> list[dict[str, Any]]:

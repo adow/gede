@@ -43,10 +43,11 @@ class OpenAICompatibleChatCompletion(LLMChatCompletion):
         api_base: str,
         model: str,
         model_settings: Optional[ModelSettings] = None,
+        timeout: Optional[float] = None,
     ):
-        super().__init__(api_key, api_base, model, model_settings)
+        super().__init__(api_key, api_base, model, model_settings, timeout)
         self.client = AsyncOpenAI(
-            api_key=self.api_key, base_url=self.api_base, timeout=300
+            api_key=self.api_key, base_url=self.api_base, timeout=timeout
         )
 
     def _convert_messages(self, messages: list[UnifiedMessage]) -> list[dict[str, Any]]:

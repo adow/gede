@@ -30,11 +30,13 @@ class LLMChatCompletion(ABC):
         api_base: str,
         model: str,
         model_settings: Optional[ModelSettings] = None,
+        timeout: Optional[float] = None,
     ):
         self.api_key = api_key
         self.api_base = api_base
         self.model = model
         self.model_settings = model_settings or ModelSettings()
+        self.timeout = timeout
 
     @abstractmethod
     async def acreate_stream(
