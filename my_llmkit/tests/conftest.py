@@ -1,3 +1,9 @@
+# coding=utf-8
+#
+# conftest.py
+#
+#
+
 import os
 import logging
 from pathlib import Path

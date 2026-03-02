@@ -294,7 +294,7 @@ async def run_cluade_pdf_file_input_test(client: ClaudeChatCompletion):
 # vision image input
 
 
-async def run_openai_image_input_test(
+async def run_openai_image_input_url_test(
     client: OpenAICompatibleChatCompletion,
 ):
     """测试 OpenAI 图片输入"""
@@ -306,6 +306,28 @@ async def run_openai_image_input_test(
                 TextContent(text=prompt),
                 ImageContent(image_url="https://tds-us-east-1.slashusr.xyz/1.png"),
                 # ImageContent.from_file("/Users/reynoldqin/Downloads/1.png"),
+            ],
+        )
+    ]
+    result = client.run_stream(
+        messages=messages,
+    )
+    stream_result = await run_stream(result)
+    content = stream_result.content.strip()
+    assert "魔法" in content or "奇幻" in content or "场景" in content
+
+
+async def run_openai_image_input_file_test(
+    client: OpenAICompatibleChatCompletion,
+):
+    """测试 OpenAI 图片输入"""
+    prompt = "图片里有什么"
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(
+            role="user",
+            content=[
+                TextContent(text=prompt),
+                ImageContent.from_file("/Users/reynoldqin/Downloads/1.png"),
             ],
         )
     ]

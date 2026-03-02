@@ -44,7 +44,8 @@ from .run_tests import (
     run_claude_json_schema_test,
     run_openai_pdf_file_input_test,
     run_claude_pdf_url_input_test,
-    run_openai_image_input_test,
+    run_openai_image_input_url_test,
+    run_openai_image_input_file_test,
     run_claude_image_input_test,
 )
 
@@ -54,50 +55,54 @@ logger = logging.getLogger(__name__)
 
 # tests
 @pytest.mark.asyncio
-async def test_gpt_5_2_zenmux():
+async def test_gpt_5_2():
     client = make_openai_client(*gpt_5_2_zenmux, reasoning=Reasoning(effort="medium"))
     await run_tool_test(client)
     await run_stream_tool_test(client)
     await run_openai_json_schema_test(client)
-    await run_openai_image_input_test(client)
+    await run_openai_image_input_url_test(client)
     await run_openai_pdf_file_input_test(client)
 
 
 @pytest.mark.asyncio
-async def test_gpt_5_2_openrouter():
-    client = make_openai_client(
-        *gpt_5_2_openrouter, reasoning=Reasoning(effort="medium")
-    )
-    await run_stream_tool_test(client)
-
-
-@pytest.mark.asyncio
-async def test_gemini_3_pro_openrouter():
+async def test_gemini_3_pro():
     client = make_openai_client(
         *gemini_3_pro_openrouter, reasoning=Reasoning(effort="medium")
     )
     await run_stream_tool_test(client)
+    await run_tool_test(client)
+    await run_openai_json_schema_test(client)
+    await run_openai_image_input_url_test(client)
+    await run_openai_pdf_file_input_test(client)
 
 
 @pytest.mark.asyncio
-async def test_kimi_k2_thinking_moonshot():
+async def test_kimi_k2_thinking():
     client = make_openai_client(
         *kimi_k2_thinking_moonshot, reasoning=Reasoning(effort="medium")
     )
     await run_stream_tool_test(client)
+    await run_tool_test(client)
+    # await run_openai_json_mode_test( client)  # kimi 在开启工具调用后无法输出 json 模式的内容
+    # kimi 不支持 pdf 图像输入
 
 
 @pytest.mark.asyncio
-async def test_kimi_k2_5_moonshot():
+async def test_kimi_k2_5():
     client = make_openai_client(
         *kimi_k2_5_moonshot, reasoning=Reasoning(effort="medium")
     )
     await run_stream_tool_test(client)
+    await run_tool_test(client)
+    # await run_openai_json_mode_test( client)  # kimi 在开启工具调用后无法输出 json 模式的内容
+    await run_openai_image_input_file_test(client)
+    # kimi 不支持 pdf 图像输入
 
 
 @pytest.mark.asyncio
-async def test_deepseek_reasoner_deepseek():
+async def test_deepseek_reasoner():
     client = make_openai_client(*deepseek_reasoner_deepseek)
+    await run_tool_test(client)
     await run_stream_tool_test(client)
 
 
