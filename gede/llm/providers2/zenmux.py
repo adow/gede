@@ -103,7 +103,7 @@ class ZenMuxProvider(LLMProviderBase):
             )
         elif model_id.startswith("anthropic"):
             settings = make_claude_reasoning(
-                model_settings=settings, reasoning_effort=reasoning_effort
+                model_id, model_settings=settings, reasoning_effort=reasoning_effort
             )
         elif model_id.startswith("google"):
             make_gemini_reasnoing(

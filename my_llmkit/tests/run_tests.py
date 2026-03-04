@@ -7,7 +7,6 @@
 import os
 import logging
 from datetime import datetime
-from openai.types import Reasoning
 from pydantic import BaseModel
 from typing import Any
 from my_llmkit.chat import (
@@ -22,9 +21,7 @@ from my_llmkit.chat.claude import ClaudeChatCompletion
 from my_llmkit.chat.openai_compatible import OpenAICompatibleChatCompletion
 from my_llmkit.mcp.mcp_config import MCPServersContext
 from .tools import now_tool, get_weather_tool
-from .conftest import (
-    make_qwen_client,
-)
+
 from .utils import RunStreamResult, run_stream
 
 logger = logging.getLogger(__name__)

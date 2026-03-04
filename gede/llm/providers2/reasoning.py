@@ -41,28 +41,37 @@ def make_grok_reasoning(
 
 
 def make_claude_reasoning(
-    model_settings: ModelSettings, reasoning_effort: ReasoningEffortType = "auto"
+    model_id: str,
+    model_settings: ModelSettings,
+    reasoning_effort: ReasoningEffortType = "auto",
 ):
     extra_body: Any = model_settings.extra_body or {}
-    if reasoning_effort == "auto":
-        if "thinking" in extra_body:
-            del extra_body["thinking"]
+    # sonnet-4.6 使用 adaptive 模式和 thinking effort
+    if "4-6" in model_id or "4.6" in model_id:
+        if reasoning_effort != "off":
+            extra_body["thinking"] = {"type": "adaptive"}
+            effort = cast(ReasoningEffort, reasoning_effort)
+            model_settings.reasoning = Reasoning(effort=effort)
+    else:
+        if reasoning_effort == "auto":
+            if "thinking" in extra_body:
+                del extra_body["thinking"]
+                model_settings.extra_body = extra_body
+                return model_settings
+        if reasoning_effort == "off":
+            extra_body["thinking"] = {"type": "disabled"}
             model_settings.extra_body = extra_body
             return model_settings
-    if reasoning_effort == "off":
-        extra_body["thinking"] = {"type": "disabled"}
-        model_settings.extra_body = extra_body
-        return model_settings
-    budget_tokens = 2000
-    if reasoning_effort == "minimal":
-        budget_tokens = 1000
-    elif reasoning_effort == "low":
         budget_tokens = 2000
-    elif reasoning_effort == "medium":
-        budget_tokens = 5000
-    elif reasoning_effort == "high":
-        budget_tokens = 10000
-    extra_body["thinking"] = {"type": "enabled", "budget_tokens": budget_tokens}
+        if reasoning_effort == "minimal":
+            budget_tokens = 1000
+        elif reasoning_effort == "low":
+            budget_tokens = 2000
+        elif reasoning_effort == "medium":
+            budget_tokens = 5000
+        elif reasoning_effort == "high":
+            budget_tokens = 10000
+        extra_body["thinking"] = {"type": "enabled", "budget_tokens": budget_tokens}
     model_settings.extra_body = extra_body
     return model_settings
 

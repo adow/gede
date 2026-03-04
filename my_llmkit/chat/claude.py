@@ -261,9 +261,22 @@ class ClaudeChatCompletion(LLMChatCompletion):
             if "thinking" in extra_body:
                 kwargs["thinking"] = extra_body["thinking"]
         # thinking effort
-        if self.model_settings.reasoning:
+        if self.model_settings.reasoning and self.model_settings.reasoning.effort in [
+            "xhigh",
+            "high",
+            "medium",
+            "low",
+        ]:
             output_config = kwargs.get("output_config", {})
-            output_config["effort"] = self.model_settings.reasoning.effort
+            # 这里只支持 max, high, medium, low
+            if self.model_settings.reasoning.effort == "xhigh":
+                output_config["effort"] = "max"
+            elif self.model_settings.reasoning.effort == "high":
+                output_config["effort"] = "high"
+            elif self.model_settings.reasoning.effort == "medium":
+                output_config["effort"] = "medium"
+            elif self.model_settings.reasoning.effort == "low":
+                output_config["effort"] = "low"
             kwargs["output_config"] = output_config
 
         return kwargs
