@@ -85,9 +85,17 @@ def make_claude_client(
     model_settings = ModelSettings(include_usage=True)
     if reasoning:
         model_settings.max_tokens = 30000
-        model_settings.extra_body = {
-            "thinking": {"type": "enabled", "budget_tokens": 10000}
-        }
+        if "4-6" in model or "4.6" in model:
+            model_settings.reasoning = Reasoning(effort="medium")
+            model_settings.extra_body = {
+                "thinking": {
+                    "type": "adaptive",
+                },
+            }
+        else:
+            model_settings.extra_body = {
+                "thinking": {"type": "enabled", "budget_tokens": 10000}
+            }
     client = ClaudeChatCompletion(
         api_key=api_key,
         api_base=api_base,
@@ -163,6 +171,11 @@ claude_4_5_sonnet_zenmux = (
     api_key_zenmux,
     api_base_zenmux_anthropic,
     "anthropic/claude-sonnet-4.5",
+)
+claude_4_6_sonnet_zenmux = (
+    api_key_zenmux,
+    api_base_zenmux_anthropic,
+    "anthropic/claude-sonnet-4.6",
 )
 claude_4_5_haiku_openrouter = (
     api_key_openrouter,

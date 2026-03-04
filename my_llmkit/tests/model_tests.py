@@ -31,6 +31,7 @@ from .conftest import (
     grok_4_zenmux,
     grok_code_fast_1_zenmux,
     claude_4_5_sonnet_zenmux,
+    claude_4_6_sonnet_zenmux,
     claude_4_5_sonnet_openrouter,
     claude_4_5_haiku_zenmux,
     claude_4_5_haiku_openrouter,
@@ -156,6 +157,15 @@ async def test_qwen_plus():
 @pytest.mark.asyncio
 async def test_claude_4_5_sonnet_zenmux():
     client = make_claude_client(*claude_4_5_sonnet_zenmux, reasoning=True)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_claude_json_schema_test(client)
+    await run_claude_image_input_test(client)
+
+
+@pytest.mark.asyncio
+async def test_claude_4_6_sonnet_zenmux():
+    client = make_claude_client(*claude_4_6_sonnet_zenmux, reasoning=True)
     await run_tool_test(client)
     await run_stream_tool_test(client)
     await run_claude_json_schema_test(client)

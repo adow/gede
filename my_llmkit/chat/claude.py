@@ -260,6 +260,11 @@ class ClaudeChatCompletion(LLMChatCompletion):
             extra_body: Any = self.model_settings.extra_body
             if "thinking" in extra_body:
                 kwargs["thinking"] = extra_body["thinking"]
+        # thinking effort
+        if self.model_settings.reasoning:
+            output_config = kwargs.get("output_config", {})
+            output_config["effort"] = self.model_settings.reasoning.effort
+            kwargs["output_config"] = output_config
 
         return kwargs
 
