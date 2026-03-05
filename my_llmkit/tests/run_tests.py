@@ -19,7 +19,6 @@ from my_llmkit.chat import (
 from my_llmkit.chat.base import LLMChatCompletion
 from my_llmkit.chat.claude import ClaudeChatCompletion
 from my_llmkit.chat.openai_compatible import OpenAICompatibleChatCompletion
-from my_llmkit.mcp.mcp_config import MCPServersContext
 from .tools import now_tool, get_weather_tool
 
 from .utils import RunStreamResult, run_stream

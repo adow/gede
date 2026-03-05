@@ -58,6 +58,8 @@ api_base_qwen = os.getenv("DASHSCOPE_BASE_URL", "")
 api_key_google = os.getenv("GOOGLE_API_KEY", "")
 api_base_google = os.getenv("GOOGLE_BASE_URL", "")
 
+api_key_minimax = os.getenv("MINIMAX_API_KEY", "")
+api_base_minimax_anthropic = os.getenv("MINIMAX_BASE_URL_ANTHROPIC", "")
 
 # clients
 
@@ -250,3 +252,4 @@ doubao_seed_2_pro = (api_key_doubao, api_base_doubao, "doubao-seed-2-0-pro-26021
 ernie_x_1_1 = (api_key_wenxin, api_base_wenxin, "ernie-x1.1-preview")
 ernie_5_thinking = (api_key_wenxin, api_base_wenxin, "ernie-5.0-thinking-latest")
 qwen_plus = ("qwen-plus", True)
+minimax_m2_5 = (api_key_minimax, api_base_minimax_anthropic, "MiniMax-M2.5")

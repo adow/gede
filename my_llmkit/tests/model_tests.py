@@ -21,6 +21,7 @@ from .conftest import (
     grok_4_1_fast_openrouter,
     claude_4_5_sonnet_zenmux,
     claude_4_6_sonnet_zenmux,
+    minimax_m2_5,
 )
 from .run_tests import (
     run_stream_tool_test,
@@ -155,3 +156,12 @@ async def test_claude_4_6_sonnet_zenmux():
     await run_stream_tool_test(client)
     await run_claude_json_schema_test(client)
     await run_claude_image_input_test(client)
+
+
+@pytest.mark.asyncio
+async def test_minimax_m2_5():
+    client = make_claude_client(*minimax_m2_5, reasoning=True)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    # minimax 的官网文档中没有找到结构化输出的说明
+    # minimax 不支持图像输入
