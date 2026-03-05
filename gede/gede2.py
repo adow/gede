@@ -110,6 +110,18 @@ async def get_input_message(
                 multiline=False,
             )
 
+        # 如果第一行单独输入 \，切换到真正的多行编辑器（用于粘贴多行文本）
+        if is_first_line and line.strip() == "\\":
+            console.print("[dim]Multi-line mode. Press Esc+Enter to submit.[/dim]")
+            with patch_stdout():
+                message = await session.prompt_async(
+                    "... ",
+                    style=style,
+                    multiline=True,
+                    prompt_continuation="... ",
+                )
+            return clean_unicode_text(message.strip())
+
         # 检查是否以 \ 结尾（续行）
         if line.rstrip().endswith("\\"):
             # 去掉行尾的 \，保存该行
