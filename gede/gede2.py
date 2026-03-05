@@ -89,28 +89,40 @@ async def get_input_message(
 ):
     prompt_text_public = HTML("<username>You</username><symbol>: </symbol>")
     prompt_text_private = HTML("<private>You (Private)</private><symbol>: </symbol>")
+    continuation_prompt = "... "
 
-    # Get input in single-line mode first
-    with patch_stdout():
-        message = await session.prompt_async(
-            prompt_text_private if is_private else prompt_text_public,
-            completer=completer,
-            style=style,
-            multiline=False,  # Default single-line mode
-        )
+    lines = []
+    is_first_line = True
 
-    # If input is backslash, switch to multi-line mode
-    if message.strip() == "\\":
-        console.print("[dim]Multi-line mode. Press Esc+Enter to submit.[/dim]")
+    while True:
+        # 根据是否是第一行选择提示符
+        if is_first_line:
+            prompt = prompt_text_private if is_private else prompt_text_public
+        else:
+            prompt = continuation_prompt
+
+        # 获取一行输入
         with patch_stdout():
-            message = await session.prompt_async(
-                "... ",
+            line = await session.prompt_async(
+                prompt,
+                completer=completer if is_first_line else None,  # 只在第一行启用补全
                 style=style,
-                multiline=True,  # Multi-line mode
-                prompt_continuation="... ",  # Continuation prompt
+                multiline=False,
             )
 
-    message = message.strip()
+        # 检查是否以 \ 结尾（续行）
+        if line.rstrip().endswith("\\"):
+            # 去掉行尾的 \，保存该行
+            lines.append(line.rstrip()[:-1].rstrip())
+            is_first_line = False
+            continue
+        else:
+            # 不以 \ 结尾，添加该行并结束输入
+            lines.append(line)
+            break
+
+    # 合并所有行
+    message = "\n".join(lines).strip()
     message = clean_unicode_text(message)
     return message
 
@@ -281,7 +293,7 @@ async def run_main():
     await context.print_chat_info()
 
     context.notification_display.dim(
-        "Tip: Type '\\' for multi-line input, or just type your message."
+        "Tip: End a line with \\ to continue input on the next line."
     )
 
     try:
