@@ -305,7 +305,7 @@ async def run_main():
     await context.print_chat_info()
 
     context.notification_display.dim(
-        "Tip: End a line with \\ to continue input on the next line."
+        "Tip: Type \\ for multi-line input, or end a line with \\ to continue input on the next line."
     )
 
     try:

@@ -426,6 +426,9 @@ def load_private_chats_files():
 
 
 def load_public_chats_files():
+    """
+    输出 [(title, filename)], title 是从文件内容中解析的标题，filename 是文件名。按照 filename 降序排序，保证最新的文件在前面。
+    """
     chat_dir = os.path.join(gede_dir(), "chats", "public")
     if not os.path.exists(chat_dir):
         os.makedirs(chat_dir)

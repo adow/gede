@@ -21,7 +21,7 @@ class PublicChatFileCompleter(Completer):
         files = load_public_chats_files()
         text = document.text.lower()
         for one in files:
-            if text in one[1].lower():
+            if text in one[0].lower():
                 yield Completion(
                     text=one[1], start_position=-len(document.text), display=one[0]
                 )
