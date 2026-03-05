@@ -156,15 +156,21 @@ async def chat(context: Context):
     full_answer_buffer = ""
     full_reasoning_buffer = ""
 
-    async for event in runner.stream_event():
-        # 渲染事件并收集内容
-        content = renderer.render_event(event)
+    try:
+        async for event in runner.stream_event():
+            # 渲染事件并收集内容
+            content = renderer.render_event(event)
 
-        # 收集完整的响应内容用于保存
-        if event.type == "reasoning_content":
-            full_reasoning_buffer += event.content
-        elif event.type == "content":
-            full_answer_buffer += event.content
+            # 收集完整的响应内容用于保存
+            if event.type == "reasoning_content":
+                full_reasoning_buffer += event.content
+            elif event.type == "content":
+                full_answer_buffer += event.content
+    except Exception as e:
+        logger.error(f"Error during chat streaming: {e}")
+        context.notification_display.error(f"Error during chat: {e}")
+        renderer.finish_message()
+        return
 
     # 保存助手消息并完成渲染
     context.current_chat.append_assistant_message(full_answer_buffer)
@@ -271,6 +277,8 @@ async def run_main():
     if args.tools:
         tools = [t.strip() for t in args.tools.split(",")] if args.tools else []
         context.tools = tools
+
+    await context.print_chat_info()
 
     context.notification_display.dim(
         "Tip: Type '\\' for multi-line input, or just type your message."

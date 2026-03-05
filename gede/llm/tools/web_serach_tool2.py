@@ -104,7 +104,7 @@ async def exa_web_search(
                 logger.error(f"No results found for {query}")
                 return None
         except httpx.RequestError as e:
-            logger.error(f"Request error while searching {query} from exa: {e}")
+            logger.error(f"Request error while searching {query} from exa: {str(e)}")
             return None
         except Exception as e:
             logger.error(f"Unexpected error while searching {query} from exa: {e}")
