@@ -340,6 +340,10 @@ async def run_main():
             await stack.aclose()
 
 
-if __name__ == "__main__":
+def main():
     apply_app_log_level("INFO")
     asyncio.run(run_main())
+
+
+if __name__ == "__main__":
+    main()

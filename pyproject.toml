@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gede"
-version = "0.3.30"
+version = "0.3.33"
 description = "A powerful CLI for interacting with multiple LLM providers. Support 10+ providers with smart chat management, encryption, MCP servers, and rich tools ecosystem."
 readme = "README.md"
 license = { text = "MIT" }
@@ -67,7 +67,7 @@ Changelog = "https://github.com/adow/gede/blob/main/CHANGELOG.md"
 gede = "gede.gede:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["gede"]
+packages = ["gede", "my_llmkit"]
 
 [tool.hatch.metadata]
 allow-direct-references = true

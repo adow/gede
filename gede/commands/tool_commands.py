@@ -11,7 +11,7 @@ from typing import Optional, List, Any
 import inquirer
 
 from .base import CommandBase
-from ..llm.tools.tools_2 import AVAILABLE_INNER_TOOL_NAMES, AVAILABLE_INNER_TOOL_DESC
+from ..llm.tools.tools import AVAILABLE_INNER_TOOL_NAMES, AVAILABLE_INNER_TOOL_DESC
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,9 @@ class SelectToolsCommand(CommandBase):
             hint_width = max(24, term_width - 8)
             tool_hints = {
                 name: (
-                    desc if len(desc) <= hint_width else (desc[: hint_width - 3] + "...")
+                    desc
+                    if len(desc) <= hint_width
+                    else (desc[: hint_width - 3] + "...")
                 )
                 for name, desc in AVAILABLE_INNER_TOOL_DESC.items()
             }
