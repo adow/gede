@@ -1,0 +1,167 @@
+# coding=utf-8
+#
+# model_tests.py
+#
+
+import logging
+import pytest
+from openai.types import Reasoning
+from .conftest import (
+    make_claude_client,
+    make_openai_client,
+    make_qwen_client,
+    gpt_5_2_zenmux,
+    gemini_3_pro_openrouter,
+    kimi_k2_thinking_moonshot,
+    kimi_k2_5_moonshot,
+    deepseek_reasoner_deepseek,
+    doubao_seed_1_8,
+    doubao_seed_2_pro,
+    ernie_x_1_1,
+    grok_4_1_fast_openrouter,
+    claude_4_5_sonnet_zenmux,
+    claude_4_6_sonnet_zenmux,
+    minimax_m2_5,
+)
+from .run_tests import (
+    run_stream_tool_test,
+    run_tool_test,
+    run_openai_json_schema_test,
+    run_openai_json_mode_test,
+    run_qwen_json_mode_test,
+    run_claude_json_schema_test,
+    run_openai_pdf_file_input_test,
+    run_claude_pdf_url_input_test,
+    run_openai_image_input_url_test,
+    run_openai_image_input_file_test,
+    run_claude_image_input_test,
+)
+
+
+logger = logging.getLogger(__name__)
+
+
+# tests
+@pytest.mark.asyncio
+async def test_gpt_5_2():
+    client = make_openai_client(*gpt_5_2_zenmux, reasoning=Reasoning(effort="medium"))
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_openai_json_schema_test(client)
+    await run_openai_image_input_url_test(client)
+    await run_openai_pdf_file_input_test(client)
+
+
+@pytest.mark.asyncio
+async def test_gemini_3_pro():
+    client = make_openai_client(
+        *gemini_3_pro_openrouter, reasoning=Reasoning(effort="medium")
+    )
+    await run_stream_tool_test(client)
+    await run_tool_test(client)
+    await run_openai_json_schema_test(client)
+    await run_openai_image_input_url_test(client)
+    await run_openai_pdf_file_input_test(client)
+
+
+@pytest.mark.asyncio
+async def test_kimi_k2_thinking():
+    client = make_openai_client(
+        *kimi_k2_thinking_moonshot, reasoning=Reasoning(effort="medium")
+    )
+    await run_stream_tool_test(client)
+    await run_tool_test(client)
+    # await run_openai_json_mode_test( client)  # kimi 在开启工具调用后无法输出 json 模式的内容
+    # kimi 不支持 pdf 图像输入
+
+
+@pytest.mark.asyncio
+async def test_kimi_k2_5():
+    client = make_openai_client(
+        *kimi_k2_5_moonshot, reasoning=Reasoning(effort="medium")
+    )
+    await run_stream_tool_test(client)
+    await run_tool_test(client)
+    # await run_openai_json_mode_test( client)  # kimi 在开启工具调用后无法输出 json 模式的内容
+    await run_openai_image_input_file_test(client)
+    # kimi 不支持 pdf 图像输入
+
+
+@pytest.mark.asyncio
+async def test_deepseek_reasoner():
+    client = make_openai_client(*deepseek_reasoner_deepseek)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_openai_json_mode_test(client)
+    # deepseek 不支持图像输入
+
+
+@pytest.mark.asyncio
+async def test_doubao_seed_2_pro():
+    client = make_openai_client(*doubao_seed_2_pro)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_openai_image_input_url_test(client)
+    # doubao-seed-2-pro 不支持结构化输出
+
+
+@pytest.mark.asyncio
+async def test_doubao_seed_1_8():
+    client = make_openai_client(*doubao_seed_1_8)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_openai_image_input_url_test(client)
+    await run_openai_json_schema_test(client)
+
+
+@pytest.mark.asyncio
+async def test_ernie_x_1_1():
+    client = make_openai_client(*ernie_x_1_1)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    # ernie-x1.1 不支持图像输入和结构化输出
+
+
+@pytest.mark.asyncio
+async def test_grok_4_1_fast():
+    client = make_openai_client(*grok_4_1_fast_openrouter)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_openai_json_schema_test(client)
+    await run_openai_image_input_url_test(client)
+
+
+@pytest.mark.asyncio
+async def test_qwen_plus():
+    client = make_qwen_client("qwen-plus", reasoning=True)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_qwen_json_mode_test(client)
+    # qwen-plus 不支持图像输入
+
+
+@pytest.mark.asyncio
+async def test_claude_4_5_sonnet_zenmux():
+    client = make_claude_client(*claude_4_5_sonnet_zenmux, reasoning=True)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_claude_json_schema_test(client)
+    await run_claude_image_input_test(client)
+
+
+@pytest.mark.asyncio
+async def test_claude_4_6_sonnet_zenmux():
+    client = make_claude_client(*claude_4_6_sonnet_zenmux, reasoning=True)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    await run_claude_json_schema_test(client)
+    await run_claude_image_input_test(client)
+
+
+@pytest.mark.asyncio
+async def test_minimax_m2_5():
+    client = make_claude_client(*minimax_m2_5, reasoning=True)
+    await run_tool_test(client)
+    await run_stream_tool_test(client)
+    # minimax 的官网文档中没有找到结构化输出的说明
+    # minimax 不支持图像输入

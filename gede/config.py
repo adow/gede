@@ -6,21 +6,16 @@
 #
 
 import os
-from pathlib import Path
+import logging
 from dotenv import load_dotenv
 
-from .top import logger
+from .top import gede_config_dir
 
-
-def get_config_dir():
-    config_dir = os.path.join(Path.home(), ".gede", "config")
-    if not os.path.exists(config_dir):
-        os.makedirs(config_dir)
-    return config_dir
+logger = logging.getLogger(__name__)
 
 
 def get_config_filepath():
-    config_dir = get_config_dir()
+    config_dir = gede_config_dir()
     return os.path.join(config_dir, ".env")
 
 
@@ -43,16 +38,37 @@ AI302_BASE_URL="https://api.302ai.cn/v1"
 OPENROUTER_API_KEY=""
 OPENROUTER_BASE_URL="https://openrouter.ai/api/v1"
 
+# zenmux
+ZENMUX_API_KEY=""
+ZENMUX_BASE_URL_OPENAI="https://zenmux.ai/api/v1"
+ZENMUX_BASE_URL_ANTHROPIC="https://zenmux.ai/api/anthropic"
+
 OPENAI_API_KEY=""
 OPENAI_BASE_URL="https://api.openai.com/v1"
 
-# v2 version
-WENXIN_API_KEY=''
-WENXIN_BASE_URL='https://qianfan.baidubce.com/v2'
+# google gemini (OpenAI compatible)
+GEMINI_API_KEY=""
+GEMINI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai/"
+
+# baidu 
+QIANFAN_API_KEY=''
+QIANFAN_BASE_URL='https://qianfan.baidubce.com/v2'
 
 # SiliconFlow
 SILICONFLOW_API_KEY=""
 SILICONFLOW_BASE_URL="https://api.siliconflow.cn/v1"
+
+# aliyun qwen
+DASHSCOPE_API_KEY=""
+DASHSCOPE_API_BASE="https://dashscope.aliyuncs.com/compatible-mode/v1"
+
+# doubao
+ARK_API_KEY=""
+ARK_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
+
+# deepseek
+DEEPSEEK_API_KEY=""
+DEEPSEEK_BASE_URL="https://api.deepseek.com/v1"
 
 # jina
 JINA_API_KEY=""
@@ -66,31 +82,6 @@ EXAAI_BASE_URL="https://api.exa.ai"
 BOCHA_API_KEY=""
 BOCHA_BASE_URL="https://api.302ai.cn/bochaai/v1"
 
-# aliyun qwen
-QWEN_API_KEY=""
-QWEN_API_BASE="https://dashscope.aliyuncs.com/compatible-mode/v1"
-
-# doubao
-DOUBAO_API_KEY=""
-DOUBAO_BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
-DOUBAO_BOT_URL="https://ark.cn-beijing.volces.com/api/v3/bots"
-
-# deepseek
-DEEPSEEK_API_KEY=""
-DEEPSEEK_BASE_URL="https://api.deepseek.com/v1"
-
-# hunyuan
-HY_APPID=""
-HY_SECRETID=""
-HY_SECRETKEY=""
-HY_API_KEY=""
-HY_BASE_URL="https://api.hunyuan.cloud.tencent.com/v1"
-
-# vllm
-VLLM_API_KEY=""
-# qwen3-8b
-VLLM_QWEN3_BASE_URL=""
-VLLM_QWEN3_MODEL="Qwen/Qwen3-8B"
 
 # generate title
 GENERATE_TITLE_MODEL=""
@@ -103,7 +94,9 @@ PHOENIX_COLLECTOR_ENDPOINT="https://app.phoenix.arize.com"
 # PHOENIX_COLLECTOR_ENDPOINT="https://app.phoenix.arize.com/s/your-project-token/v1/traces"
 
 # DEBUG=true
-# OPENAI_LOG="debug"
+# SDK log level defaults (effective when --log-level is not provided):
+# OPENAI_LOG="debug"      # allowed: "debug" / "info"
+# ANTHROPIC_LOG="debug"   # allowed: "debug" / "info"
             """
         f.write(default_content.strip())
         logger.info(f"Default .env file created at {env_filename}")

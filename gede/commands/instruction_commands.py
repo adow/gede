@@ -4,20 +4,24 @@
 # Instruction-related commands
 #
 
+import os
+import logging
 from typing import Optional
 
 import inquirer
 from prompt_toolkit.patch_stdout import patch_stdout
 from rich.prompt import Prompt
 
+from ..top import gede_instructions_dir
 from .base import CommandBase
-from ..chatcore import loaded_instructions
+
+logger = logging.getLogger(__name__)
 
 
 class SetInstructionCommand(CommandBase):
     async def get_multiline_input(self):
-        self.context.console.print(
-            "[dim]Multi-line mode. Press Esc+Enter to submit.[/dim]"
+        self.context.notification_display.info(
+            "Multi-line mode. Press Esc+Enter to submit."
         )
         with patch_stdout():
             message = await self.context.prompt_session.prompt_async(
@@ -39,7 +43,7 @@ class SetInstructionCommand(CommandBase):
                     args = await self.get_multiline_input()
             if args:
                 self.context.current_chat.set_instruction(args)
-                self.print_instruction()
+                self.context.print_instruction()
             return False
         return True
 
@@ -57,9 +61,9 @@ class SetInstructionCommand(CommandBase):
 
 
 class GetInstructionCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         if self.message == "/get-instruction":
-            self.print_instruction()
+            self.context.print_instruction()
             return False
         return True
 
@@ -77,13 +81,40 @@ class GetInstructionCommand(CommandBase):
 
 
 class SelectInstructionCommand(CommandBase):
-    def do_command(self) -> bool:
+    def load_instructions(self):
+        instructions_dir = gede_instructions_dir()
+
+        default_instruction = """You are a helpful assistant. Please follow the user's instructions carefully. """
+        if not os.path.exists(instructions_dir):
+            os.makedirs(instructions_dir)
+            file_path = os.path.join(instructions_dir, "default.txt")
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write(default_instruction)
+
+        instructions: list[tuple[str, str]] = []
+        for filename in os.listdir(instructions_dir):
+            if filename.endswith(".txt") or filename.endswith(".md"):
+                (name, ext) = os.path.splitext(filename)
+                filepath = os.path.join(instructions_dir, filename)
+                with open(filepath, "r", encoding="utf-8") as f:
+                    content = f.read().strip()
+                    if content:
+                        if name == "default":
+                            default_instruction = content
+                        else:
+                            content_lines = content.splitlines()
+                            instructions.append((content_lines[0][:38], content))
+        instructions.insert(0, (default_instruction, default_instruction))
+        logger.debug(f"Loaded {len(instructions)} instructions from {instructions_dir}")
+        return instructions
+
+    async def do_command_async(self) -> bool:
         if self.message == "/select-instruction":
             question = [
                 inquirer.List(
                     "Instruction",
                     message="Select Instruction",
-                    choices=loaded_instructions,
+                    choices=self.load_instructions(),
                     carousel=True,
                 )
             ]
@@ -91,7 +122,7 @@ class SelectInstructionCommand(CommandBase):
             if answers and "Instruction" in answers:
                 instruction = answers["Instruction"]
                 self.context.current_chat.set_instruction(instruction)
-                self.print_instruction()
+                self.context.print_instruction()
 
             return False
         return True

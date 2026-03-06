@@ -6,7 +6,7 @@
 
 from typing import Type, List
 
-from .base import CommandBase, CommandConext
+from .base import CommandBase, CommandContext
 from .common import cleanup_screen
 
 # Import all command classes
@@ -24,16 +24,17 @@ from .instruction_commands import (
 )
 from .model_commands import (
     SelectLLMCommand,
+    ManageProviderModelsCommand,
     SetMessageNumCommand,
     SetModelSettingsCommand,
     GetModelSettingsCommand,
     SetModelReasoningCommand,
-    SetModelWebSearchCommand,
 )
 from .file_commands import (
     SaveCommand,
     LoadChatCommand,
     LoadPrivateChatCommand,
+    ExportCommand,
 )
 from .tool_commands import (
     SelectToolsCommand,
@@ -43,12 +44,16 @@ from .other_commands import (
     CleanupCommand,
     SelectPromptCommand,
     HelpCommand,
-    ExportCommand,
 )
 
 
 def get_command_class_list() -> list[Type[CommandBase]]:
     """Get all synchronous command classes"""
+    return []
+
+
+def get_command_class_list_async() -> list[Type[CommandBase]]:
+    """Get all asynchronous command classes"""
     return [
         NewPublicChatCommand,
         NewPrivateChatCommand,
@@ -56,6 +61,7 @@ def get_command_class_list() -> list[Type[CommandBase]]:
         GetInstructionCommand,
         SelectInstructionCommand,
         SelectLLMCommand,
+        ManageProviderModelsCommand,
         ChatInfoCommand,
         SetMessageNumCommand,
         CleanupCommand,
@@ -64,16 +70,9 @@ def get_command_class_list() -> list[Type[CommandBase]]:
         SetModelSettingsCommand,
         GetModelSettingsCommand,
         SetModelReasoningCommand,
-        SetModelWebSearchCommand,
         SelectToolsCommand,
         CloneChatCommand,
         ExportCommand,
-    ]
-
-
-def get_command_class_list_async() -> list[Type[CommandBase]]:
-    """Get all asynchronous command classes"""
-    return [
         SaveCommand,
         LoadChatCommand,
         LoadPrivateChatCommand,
@@ -82,7 +81,7 @@ def get_command_class_list_async() -> list[Type[CommandBase]]:
     ]
 
 
-async def do_command(context: CommandConext) -> bool:
+async def do_command(context: CommandContext) -> bool:
     """
     Execute command
     """
@@ -100,7 +99,7 @@ async def do_command(context: CommandConext) -> bool:
         else:
             return False
 
-    if context.message.startswith("/"):
+    if context.message and context.message.startswith("/"):
         context.console.print("Unknown command:" + context.message, style="danger")
         return False
     return True
@@ -116,7 +115,7 @@ def get_command_hints() -> List[str]:
 
     hints = []
     command_list = get_command_class_list() + get_command_class_list_async()
-    context = CommandConext(
+    context = CommandContext(
         console=Console(),
         message="",
         current_chat=None,  # type: ignore
@@ -135,7 +134,6 @@ def get_command_hints() -> List[str]:
 
 __all__ = [
     "CommandBase",
-    "CommandConext",
     "cleanup_screen",
     "do_command",
     "get_command_hints",
@@ -151,11 +149,11 @@ __all__ = [
     "GetInstructionCommand",
     "SelectInstructionCommand",
     "SelectLLMCommand",
+    "ManageProviderModelsCommand",
     "SetMessageNumCommand",
     "SetModelSettingsCommand",
     "GetModelSettingsCommand",
     "SetModelReasoningCommand",
-    "SetModelWebSearchCommand",
     "SaveCommand",
     "LoadChatCommand",
     "LoadPrivateChatCommand",

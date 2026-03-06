@@ -4,18 +4,21 @@
 # Other miscellaneous commands
 #
 
+import os
+import logging
 from pathlib import Path
 from typing import Optional
 
-from rich.panel import Panel
 
 from .base import CommandBase
-from ..top import gede_dir
-from ..chatcore import ExportChat, loaded_prompts
+from ..top import gede_dir, gede_prompts_dir
+from ..version import get_app_version
+
+logger = logging.getLogger(__name__)
 
 
 class CleanupCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         from .common import cleanup_screen
 
         if self.message == "/cleanup":
@@ -37,11 +40,30 @@ class CleanupCommand(CommandBase):
 
 
 class SelectPromptCommand(CommandBase):
-    def do_command(self) -> bool:
+    def load_prompts(self):
+        prompts_dir = gede_prompts_dir()
+        if not os.path.exists(prompts_dir):
+            os.makedirs(prompts_dir)
+            file_path = os.path.join(prompts_dir, "hello.txt")
+            with open(file_path, "w", encoding="utf-8") as f:
+                f.write("Hello.")
+
+        prompts: list[str] = []
+        for filename in os.listdir(prompts_dir):
+            if filename.endswith(".txt") or filename.endswith(".md"):
+                filepath = os.path.join(prompts_dir, filename)
+                with open(filepath, "r") as f:
+                    content = f.read().strip()
+                    if content:
+                        prompts.append(content)
+        logger.debug(f"Loaded {len(prompts)} prompts from {prompts_dir}")
+        return prompts
+
+    async def do_command_async(self) -> bool:
         import inquirer
 
         if self.message == "/select-prompt":
-            prompts = loaded_prompts
+            prompts = self.load_prompts()
             question = [
                 inquirer.List(
                     "Prompt",
@@ -75,19 +97,42 @@ class SelectPromptCommand(CommandBase):
 
 
 class HelpCommand(CommandBase):
-    def do_command(self) -> bool:
-        from ..top import VERSION
-
+    async def do_command_async(self) -> bool:
         cmd = "/help"
         if self.message.startswith(cmd):
             # Import here to avoid circular imports
             from . import get_command_class_list, get_command_class_list_async
-            from .chat_commands import NewPublicChatCommand, NewPrivateChatCommand, QuitCommand, ChatInfoCommand, CloneChatCommand
-            from .instruction_commands import SetInstructionCommand, GetInstructionCommand, SelectInstructionCommand
-            from .model_commands import SelectLLMCommand, SetMessageNumCommand, SetModelSettingsCommand, GetModelSettingsCommand, SetModelReasoningCommand, SetModelWebSearchCommand
-            from .file_commands import SaveCommand, LoadChatCommand, LoadPrivateChatCommand
+            from .chat_commands import (
+                NewPublicChatCommand,
+                NewPrivateChatCommand,
+                QuitCommand,
+                ChatInfoCommand,
+                CloneChatCommand,
+            )
+            from .instruction_commands import (
+                SetInstructionCommand,
+                GetInstructionCommand,
+                SelectInstructionCommand,
+            )
+            from .model_commands import (
+                SelectLLMCommand,
+                ManageProviderModelsCommand,
+                SetMessageNumCommand,
+                SetModelSettingsCommand,
+                GetModelSettingsCommand,
+                SetModelReasoningCommand,
+            )
+            from .file_commands import (
+                SaveCommand,
+                LoadChatCommand,
+                LoadPrivateChatCommand,
+                ExportCommand,
+            )
             from .tool_commands import SelectToolsCommand, SelectMCPCommand
-            from .other_commands import CleanupCommand, SelectPromptCommand, ExportCommand
+            from .other_commands import (
+                CleanupCommand,
+                SelectPromptCommand,
+            )
 
             keywords = self.message[len(cmd) :].strip()
 
@@ -108,11 +153,11 @@ class HelpCommand(CommandBase):
                 ],
                 "Model Settings": [
                     SelectLLMCommand,
+                    ManageProviderModelsCommand,
                     SetMessageNumCommand,
                     SetModelSettingsCommand,
                     GetModelSettingsCommand,
                     SetModelReasoningCommand,
-                    SetModelWebSearchCommand,
                 ],
                 "File Operations": [
                     SaveCommand,
@@ -122,7 +167,7 @@ class HelpCommand(CommandBase):
                 ],
                 "Tools & MCP": [
                     SelectToolsCommand,
-                    SelectMCPCommand,
+                    # SelectMCPCommand,
                 ],
                 "Utility": [
                     CleanupCommand,
@@ -163,7 +208,10 @@ class HelpCommand(CommandBase):
                         description = command_instance.doc_description.strip()
 
                         # Filter by keyword if provided
-                        if not keywords or (keywords.lower() in hint.lower() or keywords.lower() in description.lower()):
+                        if not keywords or (
+                            keywords.lower() in hint.lower()
+                            or keywords.lower() in description.lower()
+                        ):
                             category_commands.append((cmd_entry, description))
 
                 # Only show category if it has matching commands
@@ -182,16 +230,12 @@ class HelpCommand(CommandBase):
 
             # Add usage tip if no keyword search
             if not keywords:
-                output += f"\n\n[dim]Use '/help KEYWORD' to search for specific commands.[/dim]"
+                output += "\n\n[dim]Use '/help KEYWORD' to search for specific commands.[/dim]"
 
-            self.console.print(
-                Panel(
-                    output,
-                    title="[bold]Gede Command Help[/bold]" if not keywords else f"[bold]Search Results: '{keywords}'[/bold]",
-                    subtitle=f"[dim]Version: {VERSION}[/dim]",
-                    expand=True,
-                    padding=(1, 2),
-                ),
+            self.context.info_display.command_help(
+                title="[bold]Gede Command Help[/bold]",
+                subtitle=f"[dim]Version: {get_app_version()}[/dim]",
+                description=output,
             )
 
             return False
@@ -211,44 +255,3 @@ If KEYWORD is provided, only commands containing the keyword will be shown.
     @property
     def command_hint(self) -> Optional[str | tuple[str, ...]]:
         return "/help"
-
-
-class ExportCommand(CommandBase):
-    def do_command(self) -> bool:
-        cmd = "/export"
-        if self.message.startswith(cmd):
-            filepath = self.message[len(cmd) :].strip()
-            if not filepath:
-                self.context.console.print(
-                    "Please input a valid file path.", style="warning"
-                )
-                return False
-            path = Path(filepath).expanduser()
-            if path.is_absolute():
-                if not path.parent.exists():
-                    self.context.console.print(
-                        "Parent folder not exists.", style="danger"
-                    )
-                    return False
-            else:
-                export_dir = Path(gede_dir()) / "chats" / "exports"
-                export_dir.mkdir(parents=True, exist_ok=True)
-                path = export_dir / path
-                path.parent.mkdir(parents=True, exist_ok=True)
-            exporter = ExportChat(self.context.current_chat)
-            exporter.export_txt(path)
-            self.context.console.print(f"Exported chat to {str(path)}", style="info")
-            return False
-        return True
-
-    @property
-    def command_hint(self) -> Optional[str | tuple[str, ...]]:
-        return "/export"
-
-    @property
-    def doc_title(self) -> str:
-        return "/export <FILEPATH> \nExport the current chat to a specified file"
-
-    @property
-    def doc_description(self) -> str:
-        return """Export the current chat to a specified file in TXT format. Provide the FILEPATH where you want to save the exported chat. If a relative path is provided, the chat will be saved in the 'chats/exports' directory (default: ~/.gede/chats/exports)."""

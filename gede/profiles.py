@@ -7,11 +7,13 @@
 
 import os
 import json
+import logging
 from typing import Optional, Dict, List
 from pydantic import BaseModel
 
-from .top import logger
-from .config import get_config_dir
+from .top import gede_config_dir
+
+logger = logging.getLogger(__name__)
 
 
 class Profile(BaseModel):
@@ -30,7 +32,7 @@ class Profile(BaseModel):
 
 def get_profiles_filepath():
     """Get the path to the profiles.json file"""
-    config_dir = get_config_dir()
+    config_dir = gede_config_dir()
     return os.path.join(config_dir, "profiles.json")
 
 

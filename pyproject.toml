@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "gede"
-version = "0.3.24"
+version = "0.3.33"
 description = "A powerful CLI for interacting with multiple LLM providers. Support 10+ providers with smart chat management, encryption, MCP servers, and rich tools ecosystem."
 readme = "README.md"
 license = { text = "MIT" }
@@ -34,6 +34,7 @@ classifiers = [
 ]
 requires-python = ">=3.10"
 dependencies = [
+  "anthropic>=0.77.0",
   "anyio>=4.9.0",
   "cryptography>=44.0.2",
   "httpx>=0.28.1",
@@ -43,6 +44,8 @@ dependencies = [
   "prompt-toolkit>=3.0.52",
   "pydantic>=2.10.6",
   "pyfiglet>=1.0.4",
+  "pytest>=9.0.2",
+  "pytest-asyncio>=1.3.0",
   "python-dotenv==1.0.1",
   "rich>=13.9.4",
 ]
@@ -64,4 +67,7 @@ Changelog = "https://github.com/adow/gede/blob/main/CHANGELOG.md"
 gede = "gede.gede:main"
 
 [tool.hatch.build.targets.wheel]
-packages = ["gede"]
+packages = ["gede", "my_llmkit"]
+
+[tool.hatch.metadata]
+allow-direct-references = true

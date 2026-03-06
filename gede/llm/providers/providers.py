@@ -1,0 +1,278 @@
+# coding=utf-8
+#
+# providers.py
+#
+
+import os
+import logging
+from pydantic import BaseModel, TypeAdapter
+
+from my_llmkit.models import get_model_info
+
+from ...top import gede_data_dir
+from .base import LLMProviderBase
+from .openrouter import OpenRouterProvider
+from .zenmux import ZenMuxProvider
+from .moonshot import MoonshotProvider
+from .deepseek import DeepSeekProvider
+from .baidu import BaiduProvider
+from .alibaba import AlibabaProvider
+from .voice_engine import VoiceEngineProvider
+from .google import GoogleProvider
+
+logger = logging.getLogger(__name__)
+
+PROVIDERS: list[LLMProviderBase] = [
+    OpenRouterProvider(),
+    ZenMuxProvider(),
+    MoonshotProvider(),
+    DeepSeekProvider(),
+    BaiduProvider(),
+    AlibabaProvider(),
+    VoiceEngineProvider(),
+    GoogleProvider(),
+]
+
+
+# cache
+#
+class ModelCache(BaseModel):
+    model_id: str
+    name: str
+    model_path: str
+    deleted: bool = False
+
+    @property
+    async def model_info(self):
+        return await get_model_info(self.model_path)
+
+
+class ProviderCache(BaseModel):
+    provider_id: str
+    name: str
+    models: list[ModelCache] = []
+
+
+# 启用模型列表
+MODEL_DATA: list[ProviderCache] = []
+ProviderCacheListType = TypeAdapter(list[ProviderCache])
+
+
+def load_models_from_file():
+    """
+    从文件读取模型数据到全局变量 MODEL_DATA
+    """
+    filename = os.path.join(gede_data_dir(), "models.json")
+    if os.path.exists(filename):
+        with open(filename, "r", encoding="utf-8") as f:
+            content = f.read()
+            loaded_data = ProviderCacheListType.validate_json(content)
+            # Keep list identity stable for modules that import MODEL_DATA directly.
+            MODEL_DATA.clear()
+            MODEL_DATA.extend(loaded_data)
+
+
+def save_models_to_file():
+    """
+    保存全局变量 MODEL_DATA 到文件
+    """
+    filename = os.path.join(gede_data_dir(), "models.json")
+    with open(filename, "w", encoding="utf-8") as f:
+        f.write(ProviderCacheListType.dump_json(MODEL_DATA, indent=2).decode("utf-8"))
+        logger.debug("Models cache saved.")
+
+
+async def prepare_models():
+    """
+    启动的时候准备模型列表缓存
+    """
+    global MODEL_DATA
+    if not MODEL_DATA:
+        load_models_from_file()
+
+    cache_by_provider: dict[str, ProviderCache] = {
+        one.provider_id: one for one in MODEL_DATA
+    }
+    changed = False
+
+    for provider in PROVIDERS:
+        provider_cache = cache_by_provider.get(provider.provider_id)
+        if not provider_cache:
+            provider_cache = ProviderCache(
+                provider_id=provider.provider_id, name=provider.name, models=[]
+            )
+            MODEL_DATA.append(provider_cache)
+            cache_by_provider[provider.provider_id] = provider_cache
+            changed = True
+        elif provider_cache.name != provider.name:
+            provider_cache.name = provider.name
+            changed = True
+
+        existing_model_ids = {one.model_id for one in provider_cache.models}
+        for model_id in provider.default_models or []:
+            existed_model = next(
+                (one for one in provider_cache.models if one.model_id == model_id),
+                None,
+            )
+            if existed_model:
+                continue
+            model_path = f"{provider.provider_id}:{model_id}"
+            model_info = await get_model_info(model_path)
+            if not model_info:
+                logger.warning(f"Model {model_path} info not found, skipping.")
+                continue
+            provider_cache.models.append(
+                ModelCache(
+                    model_id=model_id,
+                    name=model_info.model_name or model_id,
+                    model_path=model_path,
+                    deleted=False,
+                )
+            )
+            existing_model_ids.add(model_id)
+            changed = True
+
+    if changed:
+        PATH_VALUE_LIST.clear()
+        save_models_to_file()
+    return MODEL_DATA
+
+
+async def add_model(provider_id: str, model_id: str):
+    global MODEL_DATA
+    for provider in MODEL_DATA:
+        if provider.provider_id == provider_id:
+            # check model exists
+            find_model = next(
+                (one for one in provider.models if one.model_id == model_id), None
+            )
+            if find_model:
+                if find_model.deleted:
+                    find_model.deleted = False
+                    PATH_VALUE_LIST.clear()
+                    save_models_to_file()
+                break
+            if not find_model:
+                model_path = f"{provider_id}:{model_id}"
+                model_info = await get_model_info(model_path)
+                if not model_info:
+                    logger.warning(f"Model {model_path} info not found, cannot add.")
+                    return
+                provider.models.append(
+                    ModelCache(
+                        model_id=model_id,
+                        name=model_info.model_name or model_id,
+                        model_path=model_path,
+                        deleted=False,
+                    )
+                )
+            PATH_VALUE_LIST.clear()
+            save_models_to_file()
+            break
+
+
+async def remove_model(provider_id: str, model_id: str):
+    global MODEL_DATA
+    for provider in MODEL_DATA:
+        if provider.provider_id == provider_id:
+            # soft delete existing model
+            find_model = next(
+                (one for one in provider.models if one.model_id == model_id), None
+            )
+            if find_model:
+                find_model.deleted = True
+            else:
+                provider_def = get_provider_by_id(provider_id)
+                is_default_model = bool(
+                    provider_def and model_id in (provider_def.default_models or [])
+                )
+                if is_default_model:
+                    provider.models.append(
+                        ModelCache(
+                            model_id=model_id,
+                            name=model_id,
+                            model_path=f"{provider_id}:{model_id}",
+                            deleted=True,
+                        )
+                    )
+                else:
+                    return
+            PATH_VALUE_LIST.clear()
+            save_models_to_file()
+            break
+
+
+def get_provider_by_id(provider_id: str) -> LLMProviderBase | None:
+    """
+    根据 provider_id 获取对应的 Provider 实例
+
+    Args:
+        provider_id: Provider 的唯一标识符，如 'openrouter', 'zenmux'
+
+    Returns:
+        对应的 Provider 实例，如果找不到则返回 None
+    """
+    for provider in PROVIDERS:
+        if provider.provider_id == provider_id:
+            return provider
+    return None
+
+
+def get_provider_from_model_path(model_path: str) -> LLMProviderBase | None:
+    """
+    从 model_path 中解析 provider_id 并返回对应的 Provider 实例
+
+    Args:
+        model_path: 模型路径，格式为 'provider_id:model_id'，如 'openrouter:gpt-4'
+
+    Returns:
+        对应的 Provider 实例，如果找不到或格式错误则返回 None
+    """
+    if ":" not in model_path:
+        logger.warning(
+            f"Invalid model_path format: {model_path}, expected 'provider_id:model_id'"
+        )
+        return None
+
+    provider_id = model_path.split(":", 1)[0]
+    return get_provider_by_id(provider_id)
+
+
+PATH_VALUE_LIST: list[tuple[str, str]] = []
+
+
+def get_model_path_value_list():
+    global PATH_VALUE_LIST
+    if PATH_VALUE_LIST:
+        return PATH_VALUE_LIST
+    for one_provider in MODEL_DATA:
+        for one_model in one_provider.models:
+            if one_model.deleted:
+                continue
+            name = f"{one_provider.name}:{one_model.name}"
+            path = one_model.model_path
+            PATH_VALUE_LIST.append((name, path))
+
+    return PATH_VALUE_LIST
+
+
+# tests
+
+
+async def tests():
+    print(await prepare_models())
+    for provider in MODEL_DATA:
+        for model in provider.models:
+            if model.deleted:
+                continue
+            info = await model.model_info
+            print(f"{model.model_path} -> {info}")
+
+
+if __name__ == "__main__":
+    import asyncio
+
+    logger.setLevel(logging.DEBUG)
+    logging.getLogger("my_llmkit").setLevel(logging.DEBUG)
+
+    asyncio.run(tests())

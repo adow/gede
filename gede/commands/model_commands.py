@@ -5,33 +5,45 @@
 #
 
 import json
+import logging
 from typing import Optional, cast, Literal, Any
 
 from rich.panel import Panel
 from rich.prompt import Prompt
 from openai.types.shared import Reasoning, ReasoningEffort
-from agents import ModelSettings
 
 from .base import CommandBase
-from ..llm.providers import get_model_path_value_list
-from ..top import logger
-from ..chatcore import WebSearchType
+from ..llm.providers.providers import (
+    get_provider_from_model_path,
+    MODEL_DATA,
+    get_model_path_value_list,
+    PROVIDERS,
+    ProviderCache,
+    ModelCache,
+    save_models_to_file,
+    PATH_VALUE_LIST,
+)
+
+# from ..chatcore import WebSearchType
+from my_llmkit.chat.model_settings import ModelSettings
+
+logger = logging.getLogger(__name__)
 
 
 class SelectLLMCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         import inquirer
 
         cmd = "/select-llm"
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
-            no_cache = "--no-cache" in args
-            path_list = get_model_path_value_list(no_cache=no_cache)
+            path_list = get_model_path_value_list()
 
             provider = args.replace("--no-cache", "").strip()
             if provider:
                 path_list = [one for one in path_list if provider in one[1]]
             if not path_list:
+                self.context.notification_display.warning("No LLM models available.")
                 return False
             question = [
                 inquirer.List(
@@ -48,12 +60,9 @@ class SelectLLMCommand(CommandBase):
                 self.context.current_chat.model_path = model_path
                 # Reset user model settings when switching models
                 self.context.current_chat.user_model_settings = ModelSettings()
-                self.console.print(
-                    f"Using {self.context.current_chat.model.provider_name}:{self.context.current_chat.model.model.name} now",
-                    style="info",
-                )
+                self.context.notification_display.info(f"Using {model_path} now")
             else:
-                self.console.print("No LLM model selected.", style="warning")
+                self.context.notification_display.warning("No LLM model selected.")
             return False
 
         return True
@@ -71,17 +80,150 @@ class SelectLLMCommand(CommandBase):
         return "/select-llm"
 
 
+class ManageProviderModelsCommand(CommandBase):
+    async def do_command_async(self) -> bool:
+        import inquirer
+
+        cmd = "/model-manage"
+        if not self.message.startswith(cmd):
+            return True
+
+        provider_prefix = self.message[len(cmd) :].strip()
+        if not provider_prefix:
+            available_providers = ", ".join(
+                [provider.provider_id for provider in PROVIDERS]
+            )
+            self.context.notification_display.warning(
+                f"Please input provider, usage: /model-manage [PROVIDER]. Available providers: {available_providers}"
+            )
+            return False
+
+        matched_providers = [
+            provider
+            for provider in PROVIDERS
+            if provider.provider_id.startswith(provider_prefix)
+        ]
+        if not matched_providers:
+            self.context.notification_display.warning(
+                f"Provider not found with prefix: {provider_prefix}"
+            )
+            return False
+
+        # Prefix conflict strategy: use the first matched provider by PROVIDERS order
+        provider = matched_providers[0]
+        provider.models = []
+        await provider.load_models()
+        if not provider.models:
+            self.context.notification_display.warning(
+                f"No available models found for provider: {provider.provider_id}"
+            )
+            return False
+
+        provider_cache = next(
+            (one for one in MODEL_DATA if one.provider_id == provider.provider_id), None
+        )
+        default_selected = (
+            [model.model_id for model in provider_cache.models if not model.deleted]
+            if provider_cache
+            else []
+        )
+
+        choices: list[tuple[str, str]] = []
+        model_name_dict: dict[str, str] = {}
+        for model in provider.models:
+            model_id = model.model_id
+            model_name = model.model_name or model_id
+            model_name_dict[model_id] = model_name
+            choices.append((model_name, model_id))
+        choices.sort(key=lambda item: item[0].casefold())
+
+        answers = inquirer.prompt(
+            [
+                inquirer.Checkbox(
+                    "models",
+                    message=f"Select models to enable for {provider.provider_id} (use SPACE to select/deselect, ENTER to confirm)",
+                    choices=choices,
+                    default=default_selected,
+                )
+            ]
+        )
+        if not answers or "models" not in answers:
+            self.context.notification_display.warning("Model selection canceled.")
+            return False
+
+        selected_model_ids: list[str] = answers["models"]
+        selected_models = [
+            ModelCache(
+                model_id=model_id,
+                name=model_name_dict.get(model_id, model_id),
+                model_path=f"{provider.provider_id}:{model_id}",
+                deleted=False,
+            )
+            for model_id in selected_model_ids
+        ]
+
+        selected_model_id_set = set(selected_model_ids)
+        deleted_default_models = [
+            ModelCache(
+                model_id=model_id,
+                name=model_name_dict.get(model_id, model_id),
+                model_path=f"{provider.provider_id}:{model_id}",
+                deleted=True,
+            )
+            for model_id in (provider.default_models or [])
+            if model_id not in selected_model_id_set
+        ]
+
+        if provider_cache:
+            provider_cache.models = selected_models + deleted_default_models
+        else:
+            MODEL_DATA.append(
+                ProviderCache(
+                    provider_id=provider.provider_id,
+                    name=provider.name,
+                    models=selected_models + deleted_default_models,
+                )
+            )
+
+        PATH_VALUE_LIST.clear()
+        save_models_to_file()
+
+        total_enabled = sum(
+            len([one for one in one_provider.models if not one.deleted])
+            for one_provider in MODEL_DATA
+        )
+        self.context.notification_display.info(
+            f"{provider.provider_id} enabled {len(selected_model_ids)} models"
+        )
+        self.context.notification_display.info(f"一共启用了 {total_enabled} 个模型")
+        return False
+
+    @property
+    def doc_title(self) -> str:
+        return "/model-manage [PROVIDER]\nManage enabled models for one provider"
+
+    @property
+    def doc_description(self) -> str:
+        return """Manage enabled models for a provider with prefix matching. PROVIDER is required and matched against provider_id by prefix. This command loads all available provider models, shows a multi-select checkbox list, and persists selected models to local enabled-model cache."""
+
+    @property
+    def command_hint(self) -> Optional[str | tuple[str, ...]]:
+        return "/model-manage"
+
+
 class SetMessageNumCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         cmd = "/set-message-num"
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
             if not args.isdigit():
-                self.console.print("Please input a valid number.", style="warning")
+                self.context.notification_display.warning(
+                    "Please input a valid number."
+                )
                 return False
             num = int(args)
             self.context.current_chat.message_num_in_context = num
-            self.console.print(f"Set message number in context to {num}", style="info")
+            self.context.notification_display.info(f"Set message num to {num}")
             return False
         return True
 
@@ -99,7 +241,7 @@ class SetMessageNumCommand(CommandBase):
 
 
 class SetModelSettingsCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         cmd = "/set-model-settings"
         if self.message.startswith(cmd):
             args = self.message[len(cmd) :].strip()
@@ -203,12 +345,14 @@ class SetModelSettingsCommand(CommandBase):
                         self.context.current_chat.user_model_settings.reasoning.summary = value
                     return False
 
-                self.console.print(
-                    f"Unknown model settings key ({key})", style="warning"
+                self.context.notification_display.warning(
+                    f"Unknown model settings key ({key})"
                 )
             except Exception as e:
                 logger.exception("Set model settings error: %s", e)
-                self.console.print(f"Set model settings error: {e}", style="danger")
+                self.context.notification_display.error(
+                    f"Set model settings error: {e}"
+                )
 
             return False
 
@@ -230,14 +374,7 @@ class SetModelSettingsCommand(CommandBase):
 class GetModelSettingsCommand(CommandBase):
     def do_command(self) -> bool:
         if self.message == "/get-model-settings":
-            settings = self.context.current_chat.model_settings.to_json_dict()
-            self.console.print(
-                Panel(
-                    json.dumps(settings, indent=2, ensure_ascii=False),
-                    title="Model Settings",
-                ),
-                style="info",
-            )
+            self.context.print_model_settings()
             return False
         return True
 
@@ -255,7 +392,7 @@ class GetModelSettingsCommand(CommandBase):
 
 
 class SetModelReasoningCommand(CommandBase):
-    def do_command(self) -> bool:
+    async def do_command_async(self) -> bool:
         command = "/set-model-reasoning"
         if self.message.startswith(command):
             args = self.message[len(command) :].strip() or "off"
@@ -263,17 +400,21 @@ class SetModelReasoningCommand(CommandBase):
             allow_levels = ["minimal", "low", "medium", "high", "off", "auto"]
 
             if args not in allow_levels:
-                self.console.print(
-                    f"Invalid reasoning effort level. Choose from {','.join(allow_levels)}.",
-                    style="warning",
+                self.context.notification_display.warning(
+                    f"Invalid reasoning effort level. Choose from {','.join(allow_levels)}."
                 )
                 return False
             effort = cast(ReasoningEffort, args)
             try:
+                # TODO: set model reasoning
                 self.context.current_chat.set_model_reasoning(effort=effort)
-                self.console.print(f"Set reasoning effort to {effort}", style="info")
+                self.context.notification_display.info(
+                    f"Set reasoning effort to {effort}"
+                )
             except Exception as e:
-                self.console.print(e, style="danger")
+                self.context.notification_display.error(
+                    f"Set reasoning effort error: {e}"
+                )
             return False
         return True
 
@@ -288,39 +429,3 @@ class SetModelReasoningCommand(CommandBase):
     @property
     def doc_description(self) -> str:
         return """Enable reasoning mode for supported models (like o1). LEVEL controls thinking depth: minimal, low, medium, high, or auto. Use 'off' to disable. Deeper reasoning uses more tokens but produces more thorough answers."""
-
-
-class SetModelWebSearchCommand(CommandBase):
-    def do_command(self) -> bool:
-        command = "/set-model-web-search"
-        if self.message.startswith(command):
-            args = self.message[len(command) :].strip() or "off"
-            args = args.lower()
-            allow_types = ["on", "off", "auto"]
-            if args not in allow_types:
-                self.console.print(
-                    f"Invalid web search type. Choose from {','.join(allow_types)}.",
-                    style="warning",
-                )
-                return False
-            web_search_type = cast(WebSearchType, args)
-            try:
-                self.context.current_chat.set_model_web_search(web_search_type)
-                self.console.print(f"Set web search:{web_search_type}", style="info")
-            except Exception as e:
-                self.console.print(e, style="danger")
-            return False
-
-        return True
-
-    @property
-    def command_hint(self) -> Optional[str | tuple[str, ...]]:
-        return "/set-model-web-search"
-
-    @property
-    def doc_title(self) -> str:
-        return "/set-model-web-search <on|off|auto>\nToggle web search capability"
-
-    @property
-    def doc_description(self) -> str:
-        return """Allow the AI to search the web for current information. 'on' enables web search, 'off' disables it, and 'auto' lets the model decide when to search. Web search helps with recent events and factual queries but increases response time."""
