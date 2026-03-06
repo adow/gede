@@ -11,7 +11,7 @@ from rich.console import Console
 
 from my_llmkit.mcp import MCPServerBase, MCPServerType
 from my_llmkit.chat import ToolFunctions
-from .chatcore2 import ChatModel
+from .chatcore import ChatModel
 from .display import NotificationRenderer, InfoRenderer
 
 

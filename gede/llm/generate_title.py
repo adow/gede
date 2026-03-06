@@ -1,54 +1,59 @@
-# coding= utf-8
+# coding=utf-8
+#
+# genearte_title2.py
+#
+#
 
 import os
 import logging
-from typing import Optional
 
-from agents import (
-    Agent,
-    OpenAIChatCompletionsModel,
-    ModelSettings,
-    Runner,
-    TResponseInputItem,
-)
-from .providers import get_llm_model
+from typing import Optional
+from my_llmkit.chat import UnifiedMessage
+from .providers import get_provider_from_model_path
+
 
 logger = logging.getLogger(__name__)
 
 
-MODEL = os.getenv("GENERATE_TITLE_MODEL", "")
-
-
-async def generate_title(messages: list[TResponseInputItem]):
-    if not MODEL:
+async def generate_title(input_messages: list[UnifiedMessage]) -> Optional[str]:
+    model_path = os.getenv("GENERATE_TITLE_MODEL", "")
+    if not model_path:
         logger.warning("GENERATE_TITLE_MODEL is not set")
         return
-    (provider_id, model_id) = MODEL.split(":", 1)
-    if not provider_id or not model_id:
-        logger.error("GENERATE_TITLE_MODEL is invalid: %s", MODEL)
+    (_, model_id) = model_path.split(":", 1)
+    if not model_id:
+        logger.error("GENERATE_TITLE_MODEL is invalid: %s", model_path)
         return
-    model_result = get_llm_model(provider_id, model_id)
 
-    agent = Agent(
-        name="generate_title_agent",
-        instructions="I will give you a conversation between a user and an LLM language model. You need to generate a concise and accurate title for this conversation that reflects the core content and theme. Please ensure the title is brief and to the point, avoiding lengthy descriptions. Output only the title, nothing else.",
-        model=OpenAIChatCompletionsModel(
-            model=model_result.model.model_id, openai_client=model_result.client
-        ),
-        model_settings=ModelSettings(
-            include_usage=True,
-            max_tokens=3000,
-        ),
-    )
-    input_text = ""
-    for one in messages:
-        role = one.get("role", "user")
-        content = one.get("content", "")
-        input_text += f"{role}: {content}\n\n"
-        if len(input_text) > 3000:
-            input_text = input_text[:3000]
-            break
-    logger.debug("generate_title input_text: %s", input_text)
-    result = await Runner.run(agent, input_text)
-    output: Optional[str] = result.final_output
+    # 根据 model_path 自动选择合适的 Provider
+    provider = get_provider_from_model_path(model_path)
+    if not provider:
+        logger.error(f"Provider not found for model_path: {model_path}")
+        return
+
+    chat_client = provider.get_chat_client(model_id)
+
+    instructions = "I will give you a conversation between a user and an LLM language model. You need to generate a concise and accurate title for this conversation that reflects the core content and theme. Please ensure the title is brief and to the point, avoiding lengthy descriptions. Output only the title, nothing else."
+
+    prompts = ""
+    for one_message in input_messages:
+        if one_message.role not in ["user", "assistant"]:
+            continue
+        if not isinstance(one_message.content, str):
+            continue
+        prompts += f"{one_message.role}: {one_message.content}\n\n\n\n"
+
+    if not prompts:
+        logger.warning("No valid messages to generate title")
+        return
+
+    prompts = "以下是用户和语言模型的对话内容:\n\n\n\n" + prompts[:3000]
+
+    messages: list[UnifiedMessage] = [
+        UnifiedMessage(role="system", content=instructions),
+        UnifiedMessage(role="user", content=prompts),
+    ]
+
+    result = await chat_client.run(messages=messages)
+    output = result.last_content
     return output

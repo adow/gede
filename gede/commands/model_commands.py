@@ -13,7 +13,7 @@ from rich.prompt import Prompt
 from openai.types.shared import Reasoning, ReasoningEffort
 
 from .base import CommandBase
-from ..llm.providers2.providers import (
+from ..llm.providers.providers import (
     get_provider_from_model_path,
     MODEL_DATA,
     get_model_path_value_list,
@@ -23,7 +23,8 @@ from ..llm.providers2.providers import (
     save_models_to_file,
     PATH_VALUE_LIST,
 )
-from ..chatcore import WebSearchType
+
+# from ..chatcore import WebSearchType
 from my_llmkit.chat.model_settings import ModelSettings
 
 logger = logging.getLogger(__name__)

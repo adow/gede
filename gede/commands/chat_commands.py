@@ -14,7 +14,7 @@ from .common import cleanup_screen
 class NewPublicChatCommand(CommandBase):
     async def do_command_async(self) -> bool:
         if self.message == "/new":
-            from ..chatcore2 import ChatModel
+            from ..chatcore import ChatModel
 
             self.context.current_chat = ChatModel(is_private=False)
             self.context.print_rule("NEW CHAT")
@@ -40,7 +40,7 @@ class NewPublicChatCommand(CommandBase):
 class NewPrivateChatCommand(CommandBase):
     async def do_command_async(self) -> bool:
         if self.message == "/new-private":
-            from ..chatcore2 import ChatModel
+            from ..chatcore import ChatModel
 
             self.context.current_chat = ChatModel(is_private=True)
             self.context.info_display.rule("NEW CHAT (Private)")
@@ -113,7 +113,7 @@ class CloneChatCommand(CommandBase):
         command = "/clone-chat"
         if self.message == command:
             old_chat = self.context.current_chat
-            from ..chatcore2 import ChatModel
+            from ..chatcore import ChatModel
 
             clone_chat = ChatModel(is_private=old_chat.is_private)
             clone_chat.set_instruction(old_chat.instruction)

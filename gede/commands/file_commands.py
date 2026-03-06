@@ -13,7 +13,12 @@ from rich.prompt import Prompt
 
 from ..top import gede_dir
 from .base import CommandBase
-from ..chatcore2 import ExportChat, load_private_chats_files, load_public_chats_files
+from ..chatcore import (
+    ExportChat,
+    load_private_chats_files,
+    load_public_chats_files,
+    ChatModel,
+)
 
 
 class PublicChatFileCompleter(Completer):
@@ -99,8 +104,6 @@ class LoadChatCommand(CommandBase):
             return None
 
     async def do_command_async(self) -> bool:
-        from ..chatcore2 import ChatModel
-
         cmd = "/load-chat"
         if self.message.startswith(cmd):
             # filename = self.message[len(cmd) :].strip()
@@ -160,8 +163,6 @@ class LoadPrivateChatCommand(CommandBase):
             return None
 
     async def do_command_async(self) -> bool:
-        from ..chatcore2 import ChatModel
-
         cmd = "/load-private-chat"
         if self.message.startswith(cmd):
             # filename = self.message[len(cmd) :].strip()
